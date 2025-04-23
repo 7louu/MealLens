@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 /// A service class to handle all CRUD operations for the `users` collection in Firestore.
 /// Each user is stored as a document whose ID is the Firebase Auth UID.
 class UserService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   /// Creates or updates the user document in 'users' collection.
   /// Uses Firebase Auth UID as the document ID.
@@ -14,10 +14,10 @@ class UserService {
     required String role, // 'user' or 'admin'
     required String photoUrl,
   }) async {
-    final user = _auth.currentUser;
+    final user = auth.currentUser;
     if (user == null) throw Exception('No authenticated user.');
 
-    await _firestore.collection('users').doc(user.uid).set({
+    await firestore.collection('users').doc(user.uid).set({
       'name': name,
       'email': user.email,
       'role': role,
@@ -27,10 +27,10 @@ class UserService {
 
   /// Retrieves current user's profile data as a map or null if not exists.
   Future<Map<String, dynamic>?> getCurrentUserProfile() async {
-    final user = _auth.currentUser;
+    final user = auth.currentUser;
     if (user == null) return null;
 
-    final snap = await _firestore.collection('users').doc(user.uid).get();
+    final snap = await firestore.collection('users').doc(user.uid).get();
     return snap.exists ? snap.data() : null;
   }
 
@@ -39,17 +39,17 @@ class UserService {
   Future<void> updateUser({
     required Map<String, dynamic> updatedData,
   }) async {
-    final user = _auth.currentUser;
+    final user = auth.currentUser;
     if (user == null) throw Exception('No authenticated user.');
 
-    await _firestore.collection('users').doc(user.uid).update(updatedData);
+    await firestore.collection('users').doc(user.uid).update(updatedData);
   }
 
   /// Deletes the current user's document.
   Future<void> deleteUser() async {
-    final user = _auth.currentUser;
+    final user = auth.currentUser;
     if (user == null) throw Exception('No authenticated user.');
 
-    await _firestore.collection('users').doc(user.uid).delete();
+    await firestore.collection('users').doc(user.uid).delete();
   }
 }
