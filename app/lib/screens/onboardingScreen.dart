@@ -99,7 +99,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               bottom: 20,
               child: GestureDetector(
                 onTap: nextPage,
-                child: Image.asset('assets/images/next_button.png', width: 60), // Your custom next image
+                child: Image.asset('assets/images/next_button.png', width: 60),
               ),
             ),
           ],
