@@ -1,55 +1,43 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../models/user_model.dart';
 
-/// A service class to handle all CRUD operations for the `users` collection in Firestore.
-/// Each user is stored as a document whose ID is the Firebase Auth UID.
 class UserService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final FirebaseAuth auth = FirebaseAuth.instance;
 
-  /// Creates or updates the user document in 'users' collection.
-  /// Uses Firebase Auth UID as the document ID.
-  Future<void> createOrUpdateUser({
-    required String name,
-    required String role, // 'user' or 'admin'
-    required String photoUrl,
-  }) async {
-    final user = auth.currentUser;
-    if (user == null) throw Exception('No authenticated user.');
-
-    await firestore.collection('users').doc(user.uid).set({
-      'name': name,
-      'email': user.email,
-      'role': role,
-      'photoUrl': photoUrl,
-    }, SetOptions(merge: true));
+  /// Create or update the current user's document in Firestore.
+  Future<void> createOrUpdateUser(UserModel userModel) async {
+    await firestore.collection('users').doc(userModel.id).set(
+      userModel.toMap(),
+      SetOptions(merge: true),
+    );
   }
 
-  /// Retrieves current user's profile data as a map or null if not exists.
-  Future<Map<String, dynamic>?> getCurrentUserProfile() async {
-    final user = auth.currentUser;
-    if (user == null) return null;
+  /// Fetches the currently authenticated user's profile.
+  Future<UserModel?> getCurrentUserProfile() async {
+    final currentUser = auth.currentUser;
+    if (currentUser == null) return null;
 
-    final snap = await firestore.collection('users').doc(user.uid).get();
-    return snap.exists ? snap.data() : null;
+    final doc = await firestore.collection('users').doc(currentUser.uid).get();
+    if (!doc.exists) return null;
+
+    return UserModel.fromMap(doc.id, doc.data()!);
   }
 
-  /// Updates specified fields in the user document.
-  /// Pass a map of field names and values to update.
-  Future<void> updateUser({
-    required Map<String, dynamic> updatedData,
-  }) async {
-    final user = auth.currentUser;
-    if (user == null) throw Exception('No authenticated user.');
+  /// Updates specific fields in the current user's profile.
+  Future<void> updateUserFields(Map<String, dynamic> updatedFields) async {
+    final currentUser = auth.currentUser;
+    if (currentUser == null) throw Exception('No authenticated user.');
 
-    await firestore.collection('users').doc(user.uid).update(updatedData);
+    await firestore.collection('users').doc(currentUser.uid).update(updatedFields);
   }
 
-  /// Deletes the current user's document.
+  /// Deletes the current user's document from Firestore.
   Future<void> deleteUser() async {
-    final user = auth.currentUser;
-    if (user == null) throw Exception('No authenticated user.');
+    final currentUser = auth.currentUser;
+    if (currentUser == null) throw Exception('No authenticated user.');
 
-    await firestore.collection('users').doc(user.uid).delete();
+    await firestore.collection('users').doc(currentUser.uid).delete();
   }
 }

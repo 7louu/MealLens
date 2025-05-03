@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/food_item.dart';
+import '../models/food_model.dart';
 
 class QuantitySelectionDialog extends StatefulWidget {
-  final FoodItem foodItem;
+  final Food foodItem;
 
   const QuantitySelectionDialog({super.key, required this.foodItem});
 

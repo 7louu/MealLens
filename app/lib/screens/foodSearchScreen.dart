@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import '../models/food_item.dart';
+import '../models/food_model.dart';
 
 class FoodSearchScreen extends StatelessWidget {
   const FoodSearchScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final List<FoodItem> foodList = [
-      FoodItem(
+    final List<Food> foodList = [
+      Food(
         id: "apple",
         name: "Apple",
         category: "Fruit",
@@ -16,7 +16,7 @@ class FoodSearchScreen extends StatelessWidget {
         carbsPerGram: 0.14,
         fatPerGram: 0.002,
       ),
-      FoodItem(
+      Food(
         id: "rice",
         name: "Rice (cooked)",
         category: "Grain",

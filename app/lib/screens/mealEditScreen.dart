@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'foodSearchScreen.dart';
-import '../models/logged_food_item.dart';
-import '../models/food_item.dart';
+import '../models/meal_item_model.dart';
+import '../models/food_model.dart';
 import '../widgets/quantitySelectionDialog.dart';
 
 class MealEditScreen extends StatefulWidget {
@@ -12,9 +12,9 @@ class MealEditScreen extends StatefulWidget {
 }
 
 class MealEditScreenState extends State<MealEditScreen> {
-  List<LoggedFoodItem> _selectedItems = [];
+  List<MealItem> selectedItems = [];
 
-  void addFoodItem(FoodItem item) async {
+  void addFoodItem(Food item) async {
     final weight = await showDialog<double>(
       context: context,
       builder: (_) => QuantitySelectionDialog(foodItem: item),
@@ -22,15 +22,14 @@ class MealEditScreenState extends State<MealEditScreen> {
 
     if (weight != null) {
       setState(() {
-        final multiplier = weight;
         selectedItems.add(
-          LoggedFoodItem(
+          MealItem(
             foodId: item.id,
             weightGram: weight,
-            calories: item.caloriesPerGram * multiplier,
-            protein: item.proteinPerGram * multiplier,
-            carbs: item.carbsPerGram * multiplier,
-            fat: item.fatPerGram * multiplier,
+            calories: item.caloriesPerGram * weight,
+            protein: item.proteinPerGram * weight,
+            carbs: item.carbsPerGram * weight,
+            fat: item.fatPerGram * weight,
           ),
         );
       });
@@ -38,7 +37,7 @@ class MealEditScreenState extends State<MealEditScreen> {
   }
 
   void openFoodSearch() async {
-    final selectedFood = await Navigator.push<FoodItem>(
+    final selectedFood = await Navigator.push<Food>(
       context,
       MaterialPageRoute(builder: (_) => const FoodSearchScreen()),
     );
@@ -61,9 +60,9 @@ class MealEditScreenState extends State<MealEditScreen> {
           const SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
-              itemCount: _selectedItems.length,
+              itemCount: selectedItems.length,
               itemBuilder: (_, index) {
-                final item = _selectedItems[index];
+                final item = selectedItems[index];
                 return ListTile(
                   title: Text("Food ID: ${item.foodId}"),
                   subtitle: Text("Weight: ${item.weightGram.toStringAsFixed(1)} g"),
