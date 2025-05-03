@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:app/screens/diaryScreen.dart';
-import 'package:app/screens/lensScreen.dart';
-import 'package:app/screens/reportScreen.dart';
+import 'diaryScreen.dart';
+import 'lensScreen.dart';
+import 'reportScreen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);

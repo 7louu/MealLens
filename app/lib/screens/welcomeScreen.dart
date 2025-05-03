@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../routes/routes.dart';
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
@@ -45,7 +45,7 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        // TODO: Navigate to registration or onboarding
+                        Navigator.pushReplacementNamed(context, AppRoutes.goal);
                       },
                       child: const Text(
                         'Get Started',
@@ -63,7 +63,7 @@ class WelcomeScreen extends StatelessWidget {
                       const Text('Already have an account?'),
                       TextButton(
                         onPressed: () {
-                          // TODO: Navigate to sign-in screen
+                          Navigator.pushReplacementNamed(context, AppRoutes.signIn);
                         },
                         child: const Text(
                           'Sign In',

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
+import '../routes/routes.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -10,7 +10,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class RegisterScreenState extends State<RegisterScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -18,7 +18,7 @@ class RegisterScreenState extends State<RegisterScreen> {
   bool obscurePassword = true;
   File? profileImage;
 
-  Future<void> _pickImage() async {
+  Future<void> pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
       setState(() => profileImage = File(picked.path));
@@ -37,7 +37,7 @@ class RegisterScreenState extends State<RegisterScreen> {
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: Column(
             children: [
               Stack(
@@ -52,7 +52,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                   ),
                   Positioned(
                     child: InkWell(
-                      onTap: _pickImage,
+                      onTap: pickImage,
                       child: CircleAvatar(
                         backgroundColor: Colors.black,
                         radius: 18,
@@ -107,7 +107,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                     backgroundColor: Colors.black,
                   ),
                   onPressed:() {
-                    
+                    Navigator.pushReplacementNamed(context, AppRoutes.diary);
                   },
                   child: Text('Register', style: TextStyle(fontSize: 16)),
                 ),

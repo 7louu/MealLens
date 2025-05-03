@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/splashScreen.dart';
-import 'screens/onboardingScreen.dart';
-
+import 'routes/routes.dart';
 void main() {
   runApp(MyApp());
 }
@@ -15,7 +13,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: SplashScreen(), 
+      initialRoute: AppRoutes.splash, 
+      routes: AppRoutes.getRoutes(),
     );
   }
 }

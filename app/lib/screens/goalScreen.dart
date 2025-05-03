@@ -1,5 +1,6 @@
-import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
+import '../screens/setupScreen.dart';
+import '../routes/routes.dart';
 
 class GoalScreen extends StatefulWidget {
   const GoalScreen({super.key});
@@ -23,7 +24,9 @@ class GoalScreenState extends State<GoalScreen> {
           goalOption("Gain weight"),
         ],
       ),
-      //onNext : Implement Navigation to gender screen
+      onNext:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.gender);
+      },
     );
   }
 

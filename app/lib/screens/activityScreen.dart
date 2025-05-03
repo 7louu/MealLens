@@ -1,5 +1,6 @@
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
+import '../routes/routes.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -24,8 +25,12 @@ class ActivityScreenState extends State<ActivityScreen> {
           activityOption("Very Active"),
         ],
       ),
-      //onNext: ,
-      //onBack: ,
+      onNext:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.height);
+      },
+      onBack:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.gender);
+      },
     );
   }
 

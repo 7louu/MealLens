@@ -1,6 +1,6 @@
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
-
+import '../routes/routes.dart';
 class AgeScreen extends StatefulWidget {
   const AgeScreen({super.key});
 
@@ -33,8 +33,12 @@ class AgeScreenState extends State<AgeScreen> {
           ),
         ],
       ),
-      //onNext: ,
-      //onBack: ,
+      onNext:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.register);
+      },
+      onBack:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.weight);
+      },
     );
   }
 }

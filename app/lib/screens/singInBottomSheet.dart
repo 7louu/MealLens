@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../routes/routes.dart';
 class SignInBottomSheet extends StatelessWidget {
   const SignInBottomSheet({super.key});
 
@@ -25,7 +25,7 @@ class SignInBottomSheet extends StatelessWidget {
             leading: Image.asset('', height: 24),//don't forget to add the image
             title: const Text('Sign in with Email'),
             onTap: () {
-              //TODO: don't implement this because you don't have time
+              Navigator.pushReplacementNamed(context, AppRoutes.login);
             },
           ),
         ],

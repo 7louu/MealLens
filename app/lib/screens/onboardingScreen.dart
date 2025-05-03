@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../routes/routes.dart';
 class OnboardingContent {
   final String image;
   final String text;
@@ -23,14 +23,6 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     OnboardingContent(image: 'assets/images/onboarding2.png', text: 'Easily log your meals and track your progress.'),
     OnboardingContent(image: 'assets/images/onboarding3.png', text: 'Set realistic goals and stay motivated with our app.'),
   ];
-
-  void nextPage() {
-    if (currentIndex < onboardingData.length - 1) {
-      controller.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.ease);
-    } else {
-      // TODO : Navigate to next screen or home
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +80,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               bottom: 20,
               child: GestureDetector(
                 onTap: () {
-                  // TODO : Navigate to home or login screen
+                  Navigator.pushReplacementNamed(context, AppRoutes.welcome);
                 },
                 child: const Text("Skip", style: TextStyle(color: Colors.black, fontSize: 16)),
               ),
@@ -98,7 +90,16 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               right: 20,
               bottom: 20,
               child: GestureDetector(
-                onTap: nextPage,
+                onTap: () {
+                  if (currentIndex < onboardingData.length - 1){
+                    controller.nextPage(
+                      duration: const Duration(microseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  } else {
+                    Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+                  }  
+                },
                 child: Image.asset('assets/images/next_button.png', width: 60),
               ),
             ),

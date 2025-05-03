@@ -1,6 +1,6 @@
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
-
+import '../routes/routes.dart';
 class WeightScreen extends StatefulWidget {
   const WeightScreen({super.key});
 
@@ -33,8 +33,12 @@ class WeightScreenState extends State<WeightScreen> {
           ),
         ],
       ),
-      //onNext: ,
-      //onBack: ,
+      onNext:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.age);
+      },
+      onBack:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.height);
+      },
     );
   }
 }

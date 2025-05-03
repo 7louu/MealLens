@@ -1,6 +1,6 @@
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
-
+import '../routes/routes.dart';
 class GenderScreen extends StatefulWidget {
   const GenderScreen({super.key});
 
@@ -22,8 +22,12 @@ class GenderScreenState extends State<GenderScreen> {
           genderOption("Female"),
         ],
       ),
-      //onNext: , 
-      //onBack: ,
+      onNext:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.activity);
+      }, 
+      onBack:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.goal);
+      },
     );
   }
 

@@ -1,6 +1,6 @@
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
-
+import '../routes/routes.dart';
 class HeightScreen extends StatefulWidget {
   const HeightScreen({super.key});
 
@@ -37,8 +37,12 @@ class HeightScreenState extends State<HeightScreen> {
           ),
         ],
       ),
-      //onNext: ,
-      //onBack: ,
+      onNext:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.weight);
+      },
+      onBack:() {
+        Navigator.pushReplacementNamed(context, AppRoutes.activity);
+      },
     );
   }
 
