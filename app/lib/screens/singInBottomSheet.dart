@@ -14,7 +14,7 @@ class SignInBottomSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            leading: Image.asset('', height: 24),//don't forget to add the image
+            leading: Image.asset('assets/images/google_sign_in.png', height: 24),//don't forget to add the image
             title: const Text('Sign in with Google'),
             onTap: () {
               //TODO: link sign in with google from firebase to front 
@@ -22,7 +22,7 @@ class SignInBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ListTile(
-            leading: Image.asset('', height: 24),//don't forget to add the image
+            leading: Image.asset('assets/images/email_sign_in.png', height: 24),//don't forget to add the image
             title: const Text('Sign in with Email'),
             onTap: () {
               Navigator.pushReplacementNamed(context, AppRoutes.login);
