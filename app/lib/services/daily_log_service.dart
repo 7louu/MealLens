@@ -1,60 +1,51 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../models/daily_log_model.dart';
 
 class DailyLogService {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
-  final CollectionReference dailyLogCollection = FirebaseFirestore.instance.collection('daily_logs'); 
-  final String? userId = FirebaseAuth.instance.currentUser?.uid;
+  CollectionReference get dailyLogs => firestore.collection('daily_logs');
+
+  String? get userId => auth.currentUser?.uid;
 
   String generateLogId(DateTime date) {
-    final formattedDate = "${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}";
-    return "${userId}_$formattedDate";
+    final formatted = "${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}";
+    return "${userId}_$formatted";
   }
 
-  Future<void> createOrUpdateLog ({
-    required DateTime date,
-    required double totalCalories,
-    required double totalProtein,
-    required double totalCarbs,
-    required double totalFat,
-    required List<String> meals,
-    }) async {
-      if (userId == null) return;
+  /// Create or update the daily log for a specific date
+  Future<void> createOrUpdateLog(DailyMeal log) async {
+    if (userId == null) return;
+    final logId = generateLogId(log.mealTime);
 
-      final logId = generateLogId(date);
+    await dailyLogs.doc(logId).set(log.toMap(), SetOptions(merge: true));
+  }
 
-      final logData = {
-        'userId': userId,
-        'date': Timestamp.fromDate(date),
-        'totalCalories': totalCalories,
-        'totalProtein': totalProtein,
-        'totalCarbs': totalCarbs,
-        'totalFat': totalFat,
-        'meals': meals,
-      };
-
-      await dailyLogCollection.doc(logId).set(logData, SetOptions(merge: true));
-    }
-
-  Future<List<Map<String, dynamic>>> getLogsForUser() async {
+  /// Get all logs for the current user
+  Future<List<DailyMeal>> getLogsForUser() async {
     if (userId == null) return [];
 
-    final querySnapshot = await dailyLogCollection
+    final snapshot = await dailyLogs
         .where('userId', isEqualTo: userId)
         .orderBy('date', descending: true)
         .get();
 
-    return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    return snapshot.docs.map((doc) {
+      return DailyMeal.fromMap(doc.data() as Map<String, dynamic>);
+    }).toList();
   }
 
-  Future<void> deleteLog (DateTime date) async {
+  /// Delete a specific daily log
+  Future<void> deleteLog(DateTime date) async {
     if (userId == null) return;
-
     final logId = generateLogId(date);
-    await dailyLogCollection.doc(logId).delete();
+    await dailyLogs.doc(logId).delete();
   }
 
-  Future<void> addMealtoLog ({
+  /// Add a new meal to an existing daily log
+  Future<void> addMealToLog({
     required DateTime date,
     required String mealId,
     required String mealName,
@@ -67,7 +58,7 @@ class DailyLogService {
 
     final logId = generateLogId(date);
 
-    final mealData = {
+    final mealEntry = {
       'mealId': mealId,
       'mealName': mealName,
       'mealCalories': mealCalories,
@@ -78,12 +69,11 @@ class DailyLogService {
     };
 
     try {
-      await dailyLogCollection.doc(logId).update({
-        'meals': FieldValue.arrayUnion([mealData]),
+      await dailyLogs.doc(logId).update({
+        'meals': FieldValue.arrayUnion([mealEntry]),
       });
     } catch (e) {
       throw Exception("Failed to add meal to log: $e");
     }
-
   }
 }

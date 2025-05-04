@@ -1,76 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/meal_model.dart';
+import '../models/meal_item_model.dart';
 
-/// A service class to handle CRUD operations for the `meals` collection in Firestore.
-/// Each meal document represents one logged meal by a user.
 class MealService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  /// Creates a new meal document for the given user.
-  ///
-  /// [userId]       : UID of the user logging the meal
-  /// [items]        : List of maps representing each food item, e.g.
-  ///                  { 'foodId': 'abc', 'weightGram': 150, 'calories': 75, ... }
-  /// [timestamp]    : When the meal was logged (defaults to now if null)
-  /// [imageUrl]     : Optional URL of the meal photo
-  Future<String> createMeal({
-    required String userId,
-    required List<Map<String, dynamic>> items,
-    DateTime? timestamp,
-    String? imageUrl,
-  }) async {
-    final docRef = firestore.collection('meals').doc(); // auto-generated ID
-    final ts = timestamp ?? DateTime.now();
-
-    // Compute totals for convenience
-    double totalCalories = 0;
-    double totalProtein = 0;
-    double totalCarbs = 0;
-    double totalFat = 0;
-
-    for (var item in items) {
-      totalCalories += (item['calories'] as num).toDouble();
-      totalProtein  += (item['protein'] as num).toDouble();
-      totalCarbs    += (item['carbs'] as num).toDouble();
-      totalFat      += (item['fat'] as num).toDouble();
-    }
-
-    await docRef.set({
-      'userId': userId,
-      'timestamp': ts,
-      'imageUrl': imageUrl,
-      'items': items,
-      'totalCalories': totalCalories,
-      'totalProtein': totalProtein,
-      'totalCarbs': totalCarbs,
-      'totalFat': totalFat,
-    });
-
+  /// Creates a new meal document in Firestore.
+  Future<String> createMeal(Meal meal) async {
+    final docRef = firestore.collection('meals').doc();
+    await docRef.set(meal.toMap());
     return docRef.id;
   }
 
-  /// Retrieves all meals for a specific user, ordered by timestamp descending.
-  Future<List<Map<String, dynamic>>> getMealsByUser(String userId) async {
+  /// Gets meals for a user and maps them to MealModel.
+  Future<List<Meal>> getMealsByUser(String userId) async {
     final querySnap = await firestore
         .collection('meals')
         .where('userId', isEqualTo: userId)
         .orderBy('timestamp', descending: true)
         .get();
 
-    return querySnap.docs.map((doc) {
-      final data = doc.data();
-      data['id'] = doc.id;
-      return data;
-    }).toList();
+    return querySnap.docs
+        .map((doc) => Meal.fromMap(doc.data(), doc.id))
+        .toList();
   }
 
-  /// Updates fields of an existing meal document.
-  /// [mealId]      : ID of the meal document
-  /// [updatedData] : Map of fields to update
+  /// Updates a meal document by ID.
   Future<void> updateMeal(String mealId, Map<String, dynamic> updatedData) async {
     await firestore.collection('meals').doc(mealId).update(updatedData);
   }
 
-  /// Deletes a meal document by its ID.
+  /// Deletes a meal document by ID.
   Future<void> deleteMeal(String mealId) async {
     await firestore.collection('meals').doc(mealId).delete();
   }

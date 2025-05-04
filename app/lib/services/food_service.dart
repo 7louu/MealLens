@@ -1,62 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/food_model.dart';
 
-/// A service class to handle CRUD operations for the `foods` collection in Firestore.
-/// Each food item is stored as a document with nutritional data per gram.
 class FoodService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  /// Adds a new food item or updates an existing one.
-  ///
-  /// [foodId]        : Document ID (use auto-generated if creating new)
-  /// [name]          : Name of the food (e.g., "Apple").
-  /// [category]      : Food category (e.g., "fruit", "protein").
-  /// [calPerGram]    : Calories per gram.
-  /// [proteinPerGram]: Protein grams per gram of food.
-  /// [carbsPerGram]  : Carbs grams per gram of food.
-  /// [fatPerGram]    : Fat grams per gram of food.
-  Future<void> addOrUpdateFood({
-    String? foodId,
-    required String name,
-    required String category,
-    required double calPerGram,
-    required double proteinPerGram,
-    required double carbsPerGram,
-    required double fatPerGram,
-  }) async {
-    final CollectionReference foods = firestore.collection('foods');
-    final docRef = foodId != null
-        ? foods.doc(foodId)
-        : foods.doc(); // auto-ID if none provided
-
-    await docRef.set({
-      'name': name,
-      'category': category,
-      'caloriesPerGram': calPerGram,
-      'proteinPerGram': proteinPerGram,
-      'carbsPerGram': carbsPerGram,
-      'fatPerGram': fatPerGram,
-    }, SetOptions(merge: true));
+  /// Adds or updates a food item using the FoodModel.
+  Future<void> addOrUpdateFood(Food food) async {
+    final docRef = firestore.collection('foods').doc(food.id.isEmpty ? null : food.id);
+    await docRef.set(food.toMap(), SetOptions(merge: true));
   }
 
-  /// Retrieves a single food item by its document ID.
-  /// Returns a map of the food fields or null if not found.
-  Future<Map<String, dynamic>?> getFoodById(String foodId) async {
+  /// Retrieves a single food item by ID and maps it to FoodModel.
+  Future<Food?> getFoodById(String foodId) async {
     final snap = await firestore.collection('foods').doc(foodId).get();
-    return snap.exists ? snap.data() as Map<String, dynamic> : null;
+    if (!snap.exists) return null;
+    return Food.fromMap(snap.data()!, snap.id);
   }
 
-  /// Retrieves all food items in the `foods` collection.
-  /// Returns a list of maps containing each food's fields including its ID.
-  Future<List<Map<String, dynamic>>> getAllFoods() async {
-    final querySnap = await firestore.collection('foods').get();
-    return querySnap.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      data['id'] = doc.id;
-      return data;
-    }).toList();
+  /// Retrieves all food items as a list of FoodModel.
+  Future<List<Food>> getAllFoods() async {
+    final query = await firestore.collection('foods').get();
+    return query.docs
+        .map((doc) => Food.fromMap(doc.data(), doc.id))
+        .toList();
   }
 
-  /// Deletes a food item document by its ID.
+  /// Deletes a food item by ID.
   Future<void> deleteFood(String foodId) async {
     await firestore.collection('foods').doc(foodId).delete();
   }
