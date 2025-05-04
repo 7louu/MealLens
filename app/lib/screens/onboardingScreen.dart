@@ -80,9 +80,16 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               bottom: 20,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+                  if (currentIndex == 0) {
+                    Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+                  } else {
+                    controller.previousPage(
+                      duration: const Duration(microseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
                 },
-                child: const Text("Skip", style: TextStyle(color: Colors.black, fontSize: 16)),
+                child: Text(currentIndex == 0 ? "Skip" : "Back", style: TextStyle(color: Colors.black, fontSize: 16)),
               ),
             ),
             // Next Button

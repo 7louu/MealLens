@@ -24,9 +24,9 @@ class SetupScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
               SizedBox(height: 8),
-              Text(subtitle, style: TextStyle(fontSize: 16, color: Colors.black)),
+              Text(subtitle, style: TextStyle(fontSize: 16, color: Colors.black), textAlign: TextAlign.center),
               SizedBox(height: 32),
               Expanded(child: content),
               Row(

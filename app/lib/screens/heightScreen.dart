@@ -27,7 +27,7 @@ class HeightScreenState extends State<HeightScreen> {
             onChanged: (val) => setState(() => selectedMeters = val),
             unit: "m",
           ),
-          SizedBox(width: 16),
+          SizedBox(width: 12),
           numberPicker(
             value: selectedCentimeters,
             min: 0,

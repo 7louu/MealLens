@@ -17,9 +17,20 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   Image.asset(
                     'assets/images/app_logo.png',
-                    height: 120,
+                    height: 250,
+                    width: 250,
                   ),
                   const SizedBox(height: 20),
+                  const Text(
+                    'Welcome',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,  
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   const Text(
                     'Get started or sign in to your account',
                     textAlign: TextAlign.center,
