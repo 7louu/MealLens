@@ -1,4 +1,3 @@
-//reusable setup screen widget
 import "package:flutter/material.dart";
 
 class SetupScreen extends StatelessWidget {
@@ -24,28 +23,49 @@ class SetupScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-              SizedBox(height: 8),
-              Text(subtitle, style: TextStyle(fontSize: 16, color: Colors.black), textAlign: TextAlign.center),
-              SizedBox(height: 32),
-              Expanded(child: content),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    content,
+                  ],
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (onBack != null) 
+                  if (onBack != null)
                     TextButton(
                       onPressed: onBack,
-                      child: Text("Back", style: TextStyle(color: Colors.black)),
+                      child: const Text("Back", style: TextStyle(color: Colors.black)),
                     )
-                  else 
-                    SizedBox(width: 72),
+                  else
+                    const SizedBox(width: 72),
                   FloatingActionButton(
                     onPressed: onNext,
                     backgroundColor: Colors.black,
-                    child: Icon(Icons.arrow_forward, color: Colors.white),
-                  )
+                    child: const Icon(Icons.arrow_forward, color: Colors.white),
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ),

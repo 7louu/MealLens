@@ -29,7 +29,12 @@ class RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(color: Colors.black),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black,),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, AppRoutes.age);
+          },
+        ),
         title: Text('Register', style: TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -62,7 +67,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                   )
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 50),
               TextFormField(
                 controller: nameController,
                 decoration: InputDecoration(
@@ -98,7 +103,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 250),
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -109,7 +114,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                   onPressed:() {
                     Navigator.pushReplacementNamed(context, AppRoutes.diary);
                   },
-                  child: Text('Register', style: TextStyle(fontSize: 16)),
+                  child: Text('Register', style: TextStyle(fontSize: 16, color: Colors.white,)),
                 ),
               ),
             ],

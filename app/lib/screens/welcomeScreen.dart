@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../routes/routes.dart';
+import '../screens/singInBottomSheet.dart';
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
@@ -74,7 +75,14 @@ class WelcomeScreen extends StatelessWidget {
                       const Text('Already have an account?'),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushReplacementNamed(context, AppRoutes.signIn);
+                          showModalBottomSheet(
+                            context: context,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                            ),
+                            isScrollControlled: true,
+                            builder: (context) => SignInBottomSheet(),
+                          );
                         },
                         child: const Text(
                           'Sign In',
