@@ -30,12 +30,14 @@ class RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black,),
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black,),
           onPressed: () {
             Navigator.pushReplacementNamed(context, AppRoutes.age);
           },
         ),
         title: Text('Register', style: TextStyle(color: Colors.black)),
+        centerTitle: true,
+        surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.white,
         elevation: 0,
       ),

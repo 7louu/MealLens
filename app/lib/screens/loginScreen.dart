@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../routes/routes.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -18,8 +18,15 @@ class LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: Colors.black),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black,),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+          },
+        ),
         title: const Text('Login', style: TextStyle(color: Colors.black)),
+        centerTitle: true,
+        surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.white,
         elevation: 0,
       ),
