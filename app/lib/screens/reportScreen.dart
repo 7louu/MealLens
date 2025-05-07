@@ -9,9 +9,14 @@ class WeightEntry {
   WeightEntry(this.date, this.weight);
 }
 
-class ReportsScreen extends StatelessWidget {
-  ReportsScreen({super.key});
+class ReportsScreen extends StatefulWidget {
+  const ReportsScreen({super.key});
 
+  @override
+  State<ReportsScreen> createState() => ReportsScreenState();
+}
+
+class ReportsScreenState extends State<ReportsScreen> {
   final List<WeightEntry> weightEntries = [
     WeightEntry(DateTime(2022, 1, 21), 81.5),
     WeightEntry(DateTime(2022, 8, 31), 82),
@@ -19,6 +24,43 @@ class ReportsScreen extends StatelessWidget {
     WeightEntry(DateTime(2023, 11, 16), 89.3),
     WeightEntry(DateTime(2024, 2, 29), 91),
   ];
+
+  final TextEditingController weightController = TextEditingController();
+
+  void showAddWeightDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Add Weight"),
+        content: TextField(
+          controller: weightController,
+          keyboardType: TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(hintText: "Enter your weight (kg)"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final enteredWeight = double.tryParse(weightController.text);
+              if (enteredWeight != null) {
+                setState(() {
+                  weightEntries.add(
+                    WeightEntry(DateTime.now(), enteredWeight),
+                  );
+                });
+                weightController.clear();
+                Navigator.pop(context);
+              }
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +71,16 @@ class ReportsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 30),
             buildWeightHeader(),
             const SizedBox(height: 12),
             buildWeightChart(),
             const SizedBox(height: 20),
-            buildResultsHeader(context),
+            buildResultsHeader(),
             const SizedBox(height: 10),
-            ...weightEntries.map((entry) => buildResultCard(entry)).toList(),
+            ...weightEntries
+                .reversed
+                .map((entry) => buildResultCard(entry))
+                .toList(),
           ],
         ),
       ),
@@ -50,6 +94,10 @@ class ReportsScreen extends StatelessWidget {
         Text(
           "Weight",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+        Text(
+          "From beginning",
+          style: TextStyle(color: Colors.black54, fontSize: 13),
         ),
       ],
     );
@@ -74,9 +122,8 @@ class ReportsScreen extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
-                  final year = value.toInt();
                   return Text(
-                    '$year',
+                    value.toInt().toString(),
                     style: const TextStyle(color: Colors.black, fontSize: 10),
                   );
                 },
@@ -106,7 +153,7 @@ class ReportsScreen extends StatelessWidget {
     );
   }
 
-  Widget buildResultsHeader(BuildContext context) {
+  Widget buildResultsHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -116,9 +163,7 @@ class ReportsScreen extends StatelessWidget {
         ),
         IconButton(
           icon: const Icon(Icons.add, size: 20, color: Colors.black),
-          onPressed: () {
-            Navigator.pushNamed(context, '/addWeight');
-          },
+          onPressed: showAddWeightDialog,
         ),
       ],
     );

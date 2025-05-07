@@ -3,6 +3,7 @@ import 'foodSearchScreen.dart';
 import '../models/meal_item_model.dart';
 import '../models/food_model.dart';
 import '../widgets/quantitySelectionDialog.dart';
+import '../routes/routes.dart';
 
 class MealEditScreen extends StatefulWidget {
   const MealEditScreen({Key? key}) : super(key: key);
@@ -50,14 +51,26 @@ class MealEditScreenState extends State<MealEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit Meal")),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.black),
+          onPressed: () {
+            Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
+          },
+        ),
+        title: const Text("Edit Meal", style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.black, size: 33),
+            onPressed: openFoodSearch,
+          ),
+        ],
+      ),
       body: Column(
         children: [
-          ElevatedButton(
-            onPressed: openFoodSearch,
-            child: const Text("Add Food"),
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 7),
           Expanded(
             child: ListView.builder(
               itemCount: selectedItems.length,
@@ -71,6 +84,32 @@ class MealEditScreenState extends State<MealEditScreen> {
               },
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
+                },
+                child: const Text(
+                  "Save Meal",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 30),
         ],
       ),
     );

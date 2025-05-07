@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../routes/routes.dart';
 class DiaryScreen extends StatelessWidget {
   const DiaryScreen({super.key});
 
@@ -156,7 +156,7 @@ class DiaryScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.add, color: Colors.black, size: 20),
               onPressed: () {
-                // TODO: Add meal card dialog or navigation
+                Navigator.pushReplacementNamed(context, AppRoutes.mealEdit);
               },
             ),
           ],

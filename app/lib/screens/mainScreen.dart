@@ -46,7 +46,7 @@ class MainScreenState extends State<MainScreen> {
             IconButton(
               icon: const Icon(Icons.calendar_today, color: Colors.white),
               onPressed: () async {
-                final picked = await showDatePicker(
+                await showDatePicker(
                   context: context,
                   initialDate: DateTime.now(),
                   firstDate: DateTime(2022),
