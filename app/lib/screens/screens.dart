@@ -17,6 +17,7 @@ export 'ageScreen.dart';
 
 export 'registerScreen.dart';
 
+export 'mainScreen.dart';
 export 'diaryScreen.dart';
 export 'reportScreen.dart';
 export 'lensScreen.dart';

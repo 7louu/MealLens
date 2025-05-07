@@ -19,6 +19,7 @@ class AppRoutes {
   static const String lens = '/lens';
   static const String mealEdit = '/meal_edit';
   static const String foodSearch = '/food_search';
+  static const String mainScreen = '/main';
 
   static Map<String, WidgetBuilder> getRoutes() {
     return {
@@ -35,10 +36,11 @@ class AppRoutes {
       age: (context) => const AgeScreen(),
       register: (context) => const RegisterScreen(),
       diary: (context) => const DiaryScreen(),
-      reports: (context) => const ReportsScreen(),
+      reports: (context) => ReportsScreen(),
       lens: (context) => const LensScreen(),
       mealEdit: (context) => const MealEditScreen(),
       foodSearch: (context) => const FoodSearchScreen(),
+      mainScreen: (context) => const MainScreen(),
     };
   }
 }

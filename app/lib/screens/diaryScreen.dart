@@ -1,164 +1,199 @@
 import 'package:flutter/material.dart';
 
 class DiaryScreen extends StatelessWidget {
-  const DiaryScreen({Key? key}) : super(key: key);
+  const DiaryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = Colors.black;
-    final textColor = Colors.white;
-    final accentColor = Colors.tealAccent;
-
-    return Scaffold(
-      backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: bgColor,
-        elevation: 0,
-        title: const Text(
-          "Itami",
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.calendar_today, color: Colors.white),
-            onPressed: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(2022),
-                lastDate: DateTime(2100),
-                builder: (context, child) {
-                  return Theme(
-                    data: ThemeData.dark(), 
-                    child: child!,
-                  );
-                },
-              );
-              if (picked != null) {
-                // Update the selected date and reload meals
-              }
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+    return SafeArea(
+      bottom: false, 
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Nutrients Indicator
-            nutrientIndicator(textColor, accentColor),
-
             const SizedBox(height: 20),
-
-            /// Water Intake
-            waterIntakeCard(textColor, accentColor),
-
+            buildNutrientsIndicator(),
             const SizedBox(height: 20),
-
-            /// Meals
-            mealCard("Breakfast", 531, textColor, accentColor),
-            const SizedBox(height: 12),
-            mealCard("Lunch", 1024, textColor, accentColor),
-            // Add more meals if needed
+            buildWaterIntake(),
+            const SizedBox(height: 20),
+            buildMealsSection(context),
           ],
         ),
       ),
     );
   }
 
-  Widget nutrientIndicator(Color textColor, Color accentColor) {
+  Widget buildNutrientsIndicator() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Nutrients Indicator", style: TextStyle(color: textColor, fontSize: 18)),
-        const SizedBox(height: 10),
-        progressRow("Proteins", 150, 225, textColor, accentColor),
-        progressRow("Fats", 30, 118, textColor, accentColor),
-        progressRow("Carbs", 319, 340, textColor, accentColor),
-        const SizedBox(height: 10),
-        Text("2456 / 3400 Calories", style: TextStyle(color: accentColor)),
+        const Text("Nutrients Indicator",
+            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              buildProgressRow("Proteins", 150, 225, Colors.red),
+              buildProgressRow("Fats", 30, 118, Colors.orange),
+              buildProgressRow("Carbs", 319, 340, Colors.teal),
+              const SizedBox(height: 6),
+              LinearProgressIndicator(
+                value: 2456 / 3400,
+                minHeight: 5,
+                backgroundColor: Colors.grey[800],
+                color: Colors.teal,
+              ),
+              const SizedBox(height: 4),
+              const Text("2456 / 3400 Calories",
+                  style: TextStyle(color: Colors.white, fontSize: 13)),
+            ],
+          ),
+        ),
       ],
     );
   }
 
-  Widget progressRow(String label, int value, int max, Color textColor, Color accentColor) {
+  Widget buildProgressRow(String label, int value, int max, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("$label: $value / $max", style: TextStyle(color: textColor)),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(color: Colors.white, fontSize: 13)),
+            Text("$value / $max", style: const TextStyle(color: Colors.white, fontSize: 13)),
+          ],
+        ),
+        const SizedBox(height: 3),
         LinearProgressIndicator(
           value: value / max,
+          minHeight: 5,
           backgroundColor: Colors.grey[800],
-          color: accentColor,
-          minHeight: 6,
+          color: color,
         ),
-        const SizedBox(height: 10),
       ],
     );
   }
 
-  Widget waterIntakeCard(Color textColor, Color accentColor) {
+  Widget buildWaterIntake() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("Water Intake",
+            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Water",
+                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                    Text("1.9 / 2.5L", style: TextStyle(color: Colors.white, fontSize: 13)),
+                    SizedBox(height: 4),
+                    Text("Last time 10:45 AM", style: TextStyle(color: Colors.grey, fontSize: 11)),
+                  ],
+                ),
+              ),
+              Column(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.add, color: Colors.white, size: 20),
+                    onPressed: () {},
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.remove, color: Colors.white, size: 20),
+                    onPressed: () {},
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              Container(
+                margin: const EdgeInsets.only(left: 10),
+                width: 36,
+                height: 70,
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                alignment: Alignment.center,
+                child: const Text("76%", style: TextStyle(color: Colors.white, fontSize: 13)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildMealsSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Expanded(
+              child: Text("Meals",
+                  style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600)),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add, color: Colors.black, size: 20),
+              onPressed: () {
+                // TODO: Add meal card dialog or navigation
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        mealCard("Breakfast", "10:45 AM", 531),
+        const SizedBox(height: 8),
+        mealCard("Lunch", "03:45 PM", 1024),
+      ],
+    );
+  }
+
+  Widget mealCard(String title, String time, int calories) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.water_drop, color: Colors.blueAccent),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Water Intake", style: TextStyle(color: textColor)),
-              Text("1.9 / 2.5L", style: TextStyle(color: accentColor)),
-            ],
-          ),
-          const Spacer(),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[800],
-              foregroundColor: accentColor,
-              shape: const CircleBorder(),
-            ),
-            onPressed: () {},
-            child: const Icon(Icons.remove),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[800],
-              foregroundColor: accentColor,
-              shape: const CircleBorder(),
-            ),
-            onPressed: () {},
-            child: const Icon(Icons.add),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget mealCard(String title, int calories, Color textColor, Color accentColor) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: TextStyle(color: textColor, fontSize: 16)),
-              const SizedBox(height: 4),
-              Text("$calories Cal", style: TextStyle(color: accentColor)),
+              Text(title, style: const TextStyle(color: Colors.white, fontSize: 14)),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  const Icon(Icons.access_time, size: 12, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(time, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                ],
+              ),
             ],
           ),
           const Spacer(),
-          Icon(Icons.arrow_forward_ios, color: textColor, size: 16),
+          Text("$calories Cal", style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
         ],
       ),
     );

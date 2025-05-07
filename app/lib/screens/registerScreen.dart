@@ -114,7 +114,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                     backgroundColor: Colors.black,
                   ),
                   onPressed:() {
-                    Navigator.pushReplacementNamed(context, AppRoutes.diary);
+                    Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
                   },
                   child: Text('Register', style: TextStyle(fontSize: 16, color: Colors.white,)),
                 ),
