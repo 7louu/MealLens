@@ -5,10 +5,10 @@ class UserModel {
   final String role;
   final String photoUrl;
   final String gender;
+  final String goal;
   final int age;
-  final double height; 
+  final int height; 
   final double weight; 
-
   UserModel({
     required this.id,
     required this.name,
@@ -19,6 +19,7 @@ class UserModel {
     required this.age,
     required this.height,
     required this.weight,
+    required this.goal,
   });
 
   factory UserModel.fromMap(String id, Map<String, dynamic> data) {
@@ -30,8 +31,9 @@ class UserModel {
       photoUrl: data['photoUrl'],
       gender: data['gender'],
       age: data['age'],
-      height: (data['height'] as num).toDouble(),
+      height: data['height'],
       weight: (data['weight'] as num).toDouble(),
+      goal: data['goal'],
     );
   }
 
@@ -45,6 +47,7 @@ class UserModel {
       'age': age,
       'height': height,
       'weight': weight,
+      'goal' : goal,
     };
   }
 }

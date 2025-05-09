@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../routes/routes.dart';
+import '../registration_data.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -30,12 +31,12 @@ class RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black,),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black,),
           onPressed: () {
             Navigator.pushReplacementNamed(context, AppRoutes.age);
           },
         ),
-        title: Text('Register', style: TextStyle(color: Colors.black)),
+        title: const Text('Register', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.white,
@@ -60,7 +61,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                   Positioned(
                     child: InkWell(
                       onTap: pickImage,
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         backgroundColor: Colors.black,
                         radius: 18,
                         child: Icon(Icons.camera_alt, size: 18, color: Colors.white),
@@ -72,7 +73,7 @@ class RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 50),
               TextFormField(
                 controller: nameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.person_outline),
                   labelText: 'Name',
                   border: OutlineInputBorder(),
@@ -81,7 +82,7 @@ class RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.email_outlined),
                   labelText: 'Email',
                   border: OutlineInputBorder(),
@@ -114,6 +115,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                     backgroundColor: Colors.black,
                   ),
                   onPressed:() {
+                    //TODO : email auth
                     Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
                   },
                   child: Text('Register', style: TextStyle(fontSize: 16, color: Colors.white,)),

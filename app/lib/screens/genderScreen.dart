@@ -1,6 +1,7 @@
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
 import '../routes/routes.dart';
+import '../registration_data.dart';
 class GenderScreen extends StatefulWidget {
   const GenderScreen({super.key});
 
@@ -23,6 +24,7 @@ class GenderScreenState extends State<GenderScreen> {
         ],
       ),
       onNext:() {
+        RegistrationData.instance.gender = selectedGender;
         Navigator.pushReplacementNamed(context, AppRoutes.activity);
       }, 
       onBack:() {

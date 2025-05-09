@@ -15,6 +15,8 @@ export 'heightScreen.dart';
 export 'weightScreen.dart';
 export 'ageScreen.dart';
 
+export 'registerBottomSheet.dart';
+
 export 'registerScreen.dart';
 
 export 'mainScreen.dart';

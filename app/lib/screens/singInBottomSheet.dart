@@ -1,6 +1,8 @@
+//bottom sheet for sign in with existing account
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../routes/routes.dart';
-
+import '../services/auth_service.dart';
 class SignInBottomSheet extends StatelessWidget {
   const SignInBottomSheet({super.key});
 
@@ -16,8 +18,16 @@ class SignInBottomSheet extends StatelessWidget {
             ListTile(
               leading: Image.asset('assets/images/google_sign_in.png', height: 24),
               title: const Text('Sign in with Google'),
-              onTap: () {
-                // TODO: link sign in with google from firebase to front
+              onTap: () async {
+                final userModel = await AuthService().signInWithGoogle();
+
+                if (userModel != null) {
+                  Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No account found. Please register first')),
+                  );
+                }
               },
             ),
             const SizedBox(height: 12),

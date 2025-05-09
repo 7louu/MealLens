@@ -1,7 +1,7 @@
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
 import '../routes/routes.dart';
-
+import '../registration_data.dart';
 class HeightScreen extends StatefulWidget {
   const HeightScreen({super.key});
 
@@ -49,6 +49,8 @@ class HeightScreenState extends State<HeightScreen> {
         ],
       ),
       onNext: () {
+        final totalHeight = (selectedMeters * 100) + selectedCentimeters;
+        RegistrationData.instance.height = totalHeight;
         Navigator.pushReplacementNamed(context, AppRoutes.weight);
       },
       onBack: () {

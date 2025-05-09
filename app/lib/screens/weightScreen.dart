@@ -1,6 +1,7 @@
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
 import '../routes/routes.dart';
+import '../registration_data.dart';
 class WeightScreen extends StatefulWidget {
   const WeightScreen({super.key});
 
@@ -34,6 +35,7 @@ class WeightScreenState extends State<WeightScreen> {
         ],
       ),
       onNext:() {
+        RegistrationData.instance.weight = weight.toDouble();
         Navigator.pushReplacementNamed(context, AppRoutes.age);
       },
       onBack:() {

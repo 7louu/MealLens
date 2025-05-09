@@ -1,6 +1,8 @@
+import 'package:app/screens/screens.dart';
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
 import '../routes/routes.dart';
+import '../registration_data.dart';
 class AgeScreen extends StatefulWidget {
   const AgeScreen({super.key});
 
@@ -34,6 +36,7 @@ class AgeScreenState extends State<AgeScreen> {
         ],
       ),
       onNext:() {
+        RegistrationData.instance.age = age;
         Navigator.pushReplacementNamed(context, AppRoutes.register);
       },
       onBack:() {

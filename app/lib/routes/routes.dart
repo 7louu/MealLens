@@ -13,7 +13,8 @@ class AppRoutes {
   static const String height = '/height';
   static const String weight = '/weight';
   static const String age = '/age';
-  static const String register = '/register';
+  static const String register = '/register_google';
+  static const String registerWithEmail = '/register_email';
   static const String diary = '/diary';
   static const String reports = '/report';
   static const String lens = '/lens';
@@ -34,7 +35,8 @@ class AppRoutes {
       height: (context) => const HeightScreen(),
       weight: (context) => const WeightScreen(),
       age: (context) => const AgeScreen(),
-      register: (context) => const RegisterScreen(),
+      register: (context) => const RegisterBottomSheet(),
+      registerWithEmail: (context) => const RegisterScreen(),
       diary: (context) => const DiaryScreen(),
       reports: (context) => ReportsScreen(),
       lens: (context) => const LensScreen(),

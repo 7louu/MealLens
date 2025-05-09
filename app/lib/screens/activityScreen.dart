@@ -1,6 +1,7 @@
 import 'package:app/screens/setupScreen.dart';
 import 'package:flutter/material.dart';
 import '../routes/routes.dart';
+import '../registration_data.dart';
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key});
@@ -26,7 +27,14 @@ class ActivityScreenState extends State<ActivityScreen> {
         ],
       ),
       onNext:() {
-        Navigator.pushReplacementNamed(context, AppRoutes.height);
+        if (selectedLevel != null) {
+          RegistrationData.instance.activityLevel = selectedLevel;
+          Navigator.pushReplacementNamed(context, AppRoutes.height);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Please Select an activity level!")),
+          );
+        }
       },
       onBack:() {
         Navigator.pushReplacementNamed(context, AppRoutes.gender);

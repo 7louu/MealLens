@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/setupScreen.dart';
 import '../routes/routes.dart';
-
+import '../registration_data.dart';
 class GoalScreen extends StatefulWidget {
   const GoalScreen({super.key});
 
@@ -25,6 +25,7 @@ class GoalScreenState extends State<GoalScreen> {
         ],
       ),
       onNext:() {
+        RegistrationData.instance.goal = selectedGoal;
         Navigator.pushReplacementNamed(context, AppRoutes.gender);
       },
     );
