@@ -77,6 +77,8 @@ class RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 50),
               TextFormField(
                 controller: nameController,
+                validator: (value) =>
+                  value == null || value.isEmpty? 'Please enter your user name' : null,
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.person_outline),
                   labelText: 'Name',
@@ -86,6 +88,8 @@ class RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: emailController,
+                validator: (value) =>
+                  value == null || value.isEmpty? 'Please enter your email' : null,
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.email_outlined),
                   labelText: 'Email',
@@ -95,6 +99,8 @@ class RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: passwordController,
+                validator: (value) => 
+                  value == null || value.isEmpty? 'Please enter your password' : null,
                 obscureText: obscurePassword,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock_outline),
