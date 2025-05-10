@@ -25,8 +25,14 @@ class GoalScreenState extends State<GoalScreen> {
         ],
       ),
       onNext:() {
-        RegistrationData.instance.goal = selectedGoal;
-        Navigator.pushReplacementNamed(context, AppRoutes.gender);
+        if (selectedGoal != null) {
+          RegistrationData.instance.goal = selectedGoal;
+          Navigator.pushReplacementNamed(context, AppRoutes.gender);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Please Select a Goal!")),
+          );
+        }
       },
     );
   }

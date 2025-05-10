@@ -37,7 +37,14 @@ class AgeScreenState extends State<AgeScreen> {
       ),
       onNext:() {
         RegistrationData.instance.age = age;
-        Navigator.pushReplacementNamed(context, AppRoutes.register);
+        showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          isScrollControlled: true,
+          builder: (context) => RegisterBottomSheet(),
+          );
       },
       onBack:() {
         Navigator.pushReplacementNamed(context, AppRoutes.weight);

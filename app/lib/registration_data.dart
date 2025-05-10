@@ -5,7 +5,7 @@ class RegistrationData {
   factory RegistrationData() => instance;
   RegistrationData.internal();
 
-  String? gender, activityLevel, name, email, photoUrl, role, goal;
+  String? gender, activityLevel, name, email, photoUrl, role, goal, password;
   double? weight;
   int? age, height;
 
@@ -19,9 +19,11 @@ class RegistrationData {
   }
 
   UserModel toUserModel(String uid) {
-    return UserModel(id: uid,
+    return UserModel(
+    id: uid,
     name: name ?? '',
     email: email ?? '',
+    password: password ?? '',
     role: role ?? '',
     photoUrl: photoUrl ?? '',
     gender: gender ?? '',

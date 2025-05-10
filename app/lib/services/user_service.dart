@@ -23,6 +23,7 @@ class UserService {
       email: firebaseUser.email ?? '',
       role: 'user', 
       photoUrl: firebaseUser.photoURL ?? '',
+      password: data.password,
       gender: data.gender ?? '',
       age: data.age ?? 0,
       height: data.height ?? 0,

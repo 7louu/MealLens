@@ -24,8 +24,14 @@ class GenderScreenState extends State<GenderScreen> {
         ],
       ),
       onNext:() {
-        RegistrationData.instance.gender = selectedGender;
-        Navigator.pushReplacementNamed(context, AppRoutes.activity);
+        if (selectedGender != null) {
+          RegistrationData.instance.gender = selectedGender;
+          Navigator.pushReplacementNamed(context, AppRoutes.activity);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Please Select an Gender!")),
+          );
+        }
       }, 
       onBack:() {
         Navigator.pushReplacementNamed(context, AppRoutes.goal);

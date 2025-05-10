@@ -1,11 +1,12 @@
 class UserModel {
   final String id;
-  final String name;
+  final String? name;
   final String email;
   final String role;
   final String photoUrl;
   final String gender;
   final String goal;
+  final String? password;
   final int age;
   final int height; 
   final double weight; 
@@ -13,6 +14,7 @@ class UserModel {
     required this.id,
     required this.name,
     required this.email,
+    required this.password,
     required this.role,
     required this.photoUrl,
     required this.gender,
@@ -27,6 +29,7 @@ class UserModel {
       id: id,
       name: data['name'],
       email: data['email'],
+      password: data['password'],
       role: data['role'],
       photoUrl: data['photoUrl'],
       gender: data['gender'],
@@ -41,6 +44,7 @@ class UserModel {
     return {
       'name': name,
       'email': email,
+      'password': password,
       'role': role,
       'photoUrl': photoUrl,
       'gender': gender,

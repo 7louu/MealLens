@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../routes/routes.dart';
+import '../services/auth_service.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -73,9 +74,29 @@ class LoginScreenState extends State<LoginScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          // TODO: Authenticate user
+                          final authService = AuthService();
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => const Center(child: CircularProgressIndicator()),
+                          );
+
+                          final userModel = await authService.signInWithEmail(
+                            email: emailController.text.trim(),
+                            password: passwordController.text.trim(),
+                          );
+
+                          Navigator.pop(context);
+
+                          if (userModel != null) {
+                            Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Login failed. Please check your credentials.')),
+                            );
+                          }
                         }
                       },
                       child: const Text(

@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../routes/routes.dart';
 import '../registration_data.dart';
+import '../services/auth_service.dart';
+import '../services/user_service.dart';
+import '../models/user_model.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -114,10 +118,71 @@ class RegisterScreenState extends State<RegisterScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                   ),
-                  onPressed:() {
-                    //TODO : email auth
-                    Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
-                  },
+                  onPressed: () async {
+                      if (formKey.currentState!.validate()) {
+                        // Save data to RegistrationData singleton
+                        RegistrationData.instance.name = nameController.text.trim();
+                        RegistrationData.instance.email = emailController.text.trim();
+                        RegistrationData.instance.password = passwordController.text.trim();
+
+                        // Show loading spinner
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) => const Center(child: CircularProgressIndicator()),
+                        );
+
+                        try {
+                          final authService = AuthService();
+                          final userService = UserService();
+
+                          // Step 1: Create account in Firebase Auth
+                          final user = await authService.registerWithEmail(
+                            name: RegistrationData.instance.name,
+                            email: RegistrationData.instance.email!,
+                            password: RegistrationData.instance.password!,
+                            data: RegistrationData.instance
+                          );
+
+                          if (user == null) {
+                            Navigator.pop(context); // Remove loading
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Registration failed.')),
+                            );
+                            return;
+                          }
+
+                          // Step 2: Build UserModel
+                          final userModel = UserModel(
+                            id: user.id,
+                            name: RegistrationData.instance.name!,
+                            email: RegistrationData.instance.email!,
+                            password: RegistrationData.instance.password,
+                            role: 'user',
+                            photoUrl: '', // Add Firebase Storage logic later if needed
+                            gender: RegistrationData.instance.gender ?? '',
+                            age: RegistrationData.instance.age ?? 0,
+                            height: RegistrationData.instance.height ?? 0,
+                            weight: RegistrationData.instance.weight ?? 0,
+                            goal: RegistrationData.instance.goal ?? '',
+                          );
+
+                          // Step 3: Save to Firestore
+                          await userService.createOrUpdateUser(userModel);
+
+                          Navigator.pop(context); // Remove loading
+
+                          // Step 4: Navigate to main screen
+                          Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
+
+                        } catch (e) {
+                          Navigator.pop(context); // Remove loading
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('An error occurred: $e')),
+                          );
+                        }
+                      }
+                    },
                   child: Text('Register', style: TextStyle(fontSize: 16, color: Colors.white,)),
                 ),
               ),
