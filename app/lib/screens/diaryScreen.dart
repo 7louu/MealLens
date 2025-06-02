@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import '../routes/routes.dart';
-class DiaryScreen extends StatelessWidget {
+class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
+
+  @override
+  State<DiaryScreen> createState() => _DiaryScreenState();
+}
+
+class _DiaryScreenState extends State<DiaryScreen> {
+  double currentWater = 0; // current in Liters
+  final double waterGoal = 2.5;
+  final double step = 0.2;
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      bottom: false, 
+      bottom: false,
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
@@ -24,40 +33,82 @@ class DiaryScreen extends StatelessWidget {
     );
   }
 
+
   Widget buildNutrientsIndicator() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("Nutrients Indicator",
-            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.grey[900],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              buildProgressRow("Proteins", 150, 225, Colors.red),
-              buildProgressRow("Fats", 30, 118, Colors.orange),
-              buildProgressRow("Carbs", 319, 340, Colors.teal),
-              const SizedBox(height: 6),
-              LinearProgressIndicator(
-                value: 2456 / 3400,
-                minHeight: 5,
-                backgroundColor: Colors.grey[800],
-                color: Colors.teal,
-              ),
-              const SizedBox(height: 4),
-              const Text("2456 / 3400 Calories",
-                  style: TextStyle(color: Colors.white, fontSize: 13)),
-            ],
-          ),
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        "Nutrients Indicator",
+        style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+      const SizedBox(height: 6),
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(12),
         ),
-      ],
-    );
-  }
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Proteins / Fats / Carbs in a row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                buildNutrientColumn("Proteins", 0, 225, Colors.red),
+                buildNutrientColumn("Fats", 0, 118, Colors.orange),
+                buildNutrientColumn("Carbs", 0, 340, Colors.teal),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Calories progress bar
+            const Center(
+              child: Text(
+                "0 / 2700 Calories",
+                style: TextStyle(color: Colors.white, fontSize: 13),
+              ),
+            ),
+            const SizedBox(height: 6),
+            LinearProgressIndicator(
+              value: 0 / 3400,
+              minHeight: 6,
+              backgroundColor: Colors.grey[800],
+              color: Colors.tealAccent,
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+
+  Widget buildNutrientColumn(String label, int value, int max, Color color) {
+  return Column(
+    children: [
+      Text(
+        "$value / $max",
+        style: const TextStyle(color: Colors.white, fontSize: 12),
+      ),
+      const SizedBox(height: 4),
+      Container(
+        width: 80,
+        child: LinearProgressIndicator(
+          value: value / max,
+          minHeight: 6,
+          backgroundColor: Colors.grey[800],
+          color: color,
+        ),
+      ),
+      const SizedBox(height: 4),
+      Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontSize: 12),
+      ),
+    ],
+  );
+}
 
   Widget buildProgressRow(String label, int value, int max, Color color) {
     return Column(
@@ -83,65 +134,82 @@ class DiaryScreen extends StatelessWidget {
   }
 
   Widget buildWaterIntake() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("Water Intake",
-            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.grey[900],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Water",
-                        style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                    Text("1.9 / 2.5L", style: TextStyle(color: Colors.white, fontSize: 13)),
-                    SizedBox(height: 4),
-                    Text("Last time 10:45 AM", style: TextStyle(color: Colors.grey, fontSize: 11)),
-                  ],
-                ),
-              ),
-              Column(
+  double percentage = (currentWater / waterGoal).clamp(0.0, 1.0);
+  int percentDisplay = (percentage * 100).round();
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text("Water Intake",
+          style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600)),
+      const SizedBox(height: 6),
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                    onPressed: () {},
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.remove, color: Colors.white, size: 20),
-                    onPressed: () {},
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
+                  const Text("Water",
+                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  Text("${currentWater.toStringAsFixed(1)} / $waterGoal L",
+                      style: const TextStyle(color: Colors.white, fontSize: 13)),
+                  const SizedBox(height: 4),
+                  const Text("Last time 10:45 AM",
+                      style: TextStyle(color: Colors.grey, fontSize: 11)),
                 ],
               ),
-              Container(
-                margin: const EdgeInsets.only(left: 10),
-                width: 36,
-                height: 70,
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent,
-                  borderRadius: BorderRadius.circular(20),
+            ),
+            Column(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.add, color: Colors.white, size: 20),
+                  onPressed: () {
+                    setState(() {
+                      currentWater = (currentWater + step).clamp(0.0, waterGoal);
+                    });
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
-                alignment: Alignment.center,
-                child: const Text("76%", style: TextStyle(color: Colors.white, fontSize: 13)),
+                IconButton(
+                  icon: const Icon(Icons.remove, color: Colors.white, size: 20),
+                  onPressed: () {
+                    setState(() {
+                      currentWater = (currentWater - step).clamp(0.0, waterGoal);
+                    });
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            Container(
+              margin: const EdgeInsets.only(left: 10),
+              width: 36,
+              height: 70,
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+                borderRadius: BorderRadius.circular(20),
               ),
-            ],
-          ),
+              alignment: Alignment.center,
+              child: Text(
+                "$percentDisplay%",
+                style: const TextStyle(color: Colors.white, fontSize: 13),
+              ),
+            ),
+          ],
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
+
 
   Widget buildMealsSection(BuildContext context) {
     return Column(
