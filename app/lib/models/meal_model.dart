@@ -4,6 +4,7 @@ import 'meal_item_model.dart';
 class Meal {
   final String id;
   final String userId;
+  final String title;
   final DateTime timestamp;
   final String? imageUrl;
   final List<MealItem> items;
@@ -15,6 +16,7 @@ class Meal {
   Meal({
     required this.id,
     required this.userId,
+    required this.title,
     required this.timestamp,
     this.imageUrl,
     required this.items,
@@ -27,16 +29,17 @@ class Meal {
   factory Meal.fromMap(Map<String, dynamic> data, String id) {
     return Meal(
       id: id,
-      userId: data['userId'],
+      userId: data['userId'] ?? '',
+      title: data['title'] ?? 'Untitled Meal',
       timestamp: (data['timestamp'] as Timestamp).toDate(),
-      imageUrl: data['imageUrl'],
-      items: (data['items'] as List)
-          .map((item) => MealItem.fromMap(item as Map<String, dynamic>))
-          .toList(),
-      totalCalories: (data['totalCalories'] as num).toDouble(),
-      totalProtein: (data['totalProtein'] as num).toDouble(),
-      totalCarbs: (data['totalCarbs'] as num).toDouble(),
-      totalFat: (data['totalFat'] as num).toDouble(),
+      imageUrl: data['imageUrl'], // nullable, no issue
+      items: (data['items'] as List?)?.map((item) =>
+        MealItem.fromMap(item as Map<String, dynamic>)
+      ).toList() ?? [],
+      totalCalories: (data['totalCalories'] ?? 0).toDouble(),
+      totalProtein: (data['totalProtein'] ?? 0).toDouble(),
+      totalCarbs: (data['totalCarbs'] ?? 0).toDouble(),
+      totalFat: (data['totalFat'] ?? 0).toDouble(),
     );
   }
 

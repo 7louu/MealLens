@@ -17,47 +17,88 @@ class ReportsScreen extends StatefulWidget {
 }
 
 class ReportsScreenState extends State<ReportsScreen> {
-  final List<WeightEntry> weightEntries = [
-    WeightEntry(DateTime(2022, 1, 21), 81.5),
-    WeightEntry(DateTime(2022, 8, 31), 82),
-    WeightEntry(DateTime(2023, 1, 1), 83.5),
-    WeightEntry(DateTime(2023, 11, 16), 89.3),
-    WeightEntry(DateTime(2024, 2, 29), 91),
-  ];
+  final List<WeightEntry> weightEntries = [];
 
   final TextEditingController weightController = TextEditingController();
+  DateTime? selectedDate;
 
   void showAddWeightDialog() {
+    selectedDate = null;
+    weightController.clear();
+
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Add Weight"),
-        content: TextField(
-          controller: weightController,
-          keyboardType: TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(hintText: "Enter your weight (kg)"),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+      builder: (_) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          title: const Text("Add Weight"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: weightController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(hintText: "Enter your weight (kg)"),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      selectedDate == null
+                          ? "No date chosen"
+                          : DateFormat('MMM d, yyyy').format(selectedDate!),
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      final now = DateTime.now();
+                      final pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: selectedDate ?? now,
+                        firstDate: DateTime(2000),
+                        lastDate: now,
+                      );
+                      if (pickedDate != null) {
+                        setStateDialog(() {
+                          selectedDate = pickedDate;
+                        });
+                      }
+                    },
+                    child: const Text("Choose Date"),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              final enteredWeight = double.tryParse(weightController.text);
-              if (enteredWeight != null) {
-                setState(() {
-                  weightEntries.add(
-                    WeightEntry(DateTime.now(), enteredWeight),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final enteredWeight = double.tryParse(weightController.text);
+                if (enteredWeight != null && selectedDate != null) {
+                  setState(() {
+                    weightEntries.add(
+                      WeightEntry(selectedDate!, enteredWeight),
+                    );
+                    weightEntries.sort((a, b) => a.date.compareTo(b.date)); // Optional: keep sorted
+                  });
+                  weightController.clear();
+                  Navigator.pop(context);
+                } else {
+                  // Show error if weight or date not entered
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter weight and choose a date')),
                   );
-                });
-                weightController.clear();
-                Navigator.pop(context);
-              }
-            },
-            child: const Text("Save"),
-          ),
-        ],
+                }
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -77,10 +118,7 @@ class ReportsScreenState extends State<ReportsScreen> {
             const SizedBox(height: 20),
             buildResultsHeader(),
             const SizedBox(height: 10),
-            ...weightEntries
-                .reversed
-                .map((entry) => buildResultCard(entry))
-                .toList(),
+            ...weightEntries.reversed.map(buildResultCard).toList(),
           ],
         ),
       ),
@@ -104,6 +142,14 @@ class ReportsScreenState extends State<ReportsScreen> {
   }
 
   Widget buildWeightChart() {
+    final sortedEntries = List<WeightEntry>.from(weightEntries)
+      ..sort((a, b) => a.date.compareTo(b.date));
+
+    List<FlSpot> spots = sortedEntries.map((e) {
+      final yearDecimal = e.date.year.toDouble() + (e.date.month / 12);
+      return FlSpot(yearDecimal, e.weight);
+    }).toList();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -116,19 +162,28 @@ class ReportsScreenState extends State<ReportsScreen> {
         LineChartData(
           titlesData: FlTitlesData(
             leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true, reservedSize: 35),
-            ),
-            bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
+                reservedSize: 35,
+                interval: 5,
                 getTitlesWidget: (value, meta) {
                   return Text(
                     value.toInt().toString(),
-                    style: const TextStyle(color: Colors.black, fontSize: 10),
+                    style: const TextStyle(color: Colors.black54, fontSize: 12),
                   );
                 },
-                interval: 1,
               ),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: false, // Hide X axis labels
+              ),
+            ),
+            rightTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
             ),
           ),
           gridData: FlGridData(show: false),
@@ -137,10 +192,7 @@ class ReportsScreenState extends State<ReportsScreen> {
           maxY: 100,
           lineBarsData: [
             LineChartBarData(
-              spots: weightEntries.map((e) {
-                final yearDecimal = e.date.year.toDouble() + (e.date.month / 12);
-                return FlSpot(yearDecimal, e.weight);
-              }).toList(),
+              spots: spots,
               isCurved: true,
               color: Colors.green,
               barWidth: 3,

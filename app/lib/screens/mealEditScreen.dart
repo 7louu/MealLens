@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'foodSearchScreen.dart';
+
 import '../models/meal_item_model.dart';
 import '../models/food_model.dart';
 import '../widgets/quantitySelectionDialog.dart';
@@ -13,6 +17,7 @@ class MealEditScreen extends StatefulWidget {
 }
 
 class MealEditScreenState extends State<MealEditScreen> {
+  final TextEditingController _titleController = TextEditingController();
   List<MealItem> selectedItems = [];
 
   void addFoodItem(Food item) async {
@@ -49,6 +54,12 @@ class MealEditScreenState extends State<MealEditScreen> {
   }
 
   @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -70,7 +81,18 @@ class MealEditScreenState extends State<MealEditScreen> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 7),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: 'Meal Title',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
               itemCount: selectedItems.length,
@@ -96,7 +118,39 @@ class MealEditScreenState extends State<MealEditScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('User not logged in')),
+                    );
+                    return;
+                  }
+
+                  final userId = user.uid;
+                  final timestamp = DateTime.now();
+
+                  final totalCalories = selectedItems.fold(0.0, (sum, item) => sum + item.calories);
+                  final totalProtein = selectedItems.fold(0.0, (sum, item) => sum + item.protein);
+                  final totalCarbs = selectedItems.fold(0.0, (sum, item) => sum + item.carbs);
+                  final totalFat = selectedItems.fold(0.0, (sum, item) => sum + item.fat);
+
+                  final mealData = {
+                    'userId': userId,
+                    'title': _titleController.text.trim().isEmpty
+                        ? 'Untitled Meal'
+                        : _titleController.text.trim(),
+                    'timestamp': timestamp,
+                    'imageUrl': null,
+                    'items': selectedItems.map((item) => item.toMap()).toList(),
+                    'totalCalories': totalCalories,
+                    'totalProtein': totalProtein,
+                    'totalCarbs': totalCarbs,
+                    'totalFat': totalFat,
+                  };
+
+                  await FirebaseFirestore.instance.collection('meals').add(mealData);
+
                   Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
                 },
                 child: const Text(
