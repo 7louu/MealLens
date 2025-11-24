@@ -19,14 +19,33 @@ class SignInBottomSheet extends StatelessWidget {
               leading: Image.asset('assets/images/google_sign_in.png', height: 24),
               title: const Text('Sign in with Google'),
               onTap: () async {
-                final userModel = await AuthService().signInWithGoogle();
+                // Show loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(child: CircularProgressIndicator()),
+                );
 
-                if (userModel != null) {
-                  Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No account found. Please register first')),
-                  );
+                try {
+                  final userModel = await AuthService().signInWithGoogle();
+                  
+                  // Close loading indicator
+                  if (context.mounted) Navigator.pop(context);
+
+                  if (userModel != null && context.mounted) {
+                    Navigator.pushNamedAndRemoveUntil(context, AppRoutes.mainScreen, (route) => false);
+                  } else if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Sign in failed or cancelled.')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    Navigator.pop(context); // Close dialog
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
                 }
               },
             ),

@@ -34,8 +34,25 @@ class AuthService {
         return UserModel.fromMap(user.uid, doc.data()!);
       }
 
-      // User signed in but has no profile yet
-      return null;
+      // User signed in but has no profile yet -> Create one!
+      final newUser = UserModel(
+        id: user.uid,
+        name: user.displayName ?? 'User',
+        email: user.email ?? '',
+        password: '', // No password for Google users
+        role: 'user',
+        photoUrl: user.photoURL ?? '',
+        gender: 'Not specified',
+        age: 0,
+        height: 0,
+        weight: 0.0,
+        goal: 'Not specified',
+      );
+
+      // Save to Firestore
+      await firestore.collection('users').doc(user.uid).set(newUser.toMap());
+
+      return newUser;
 
     } catch (e) {
       print("Google Sign-in failed: $e");
