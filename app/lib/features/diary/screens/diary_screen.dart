@@ -6,7 +6,9 @@ import '../../../shared/models/user_model.dart';
 import '../../../routes/routes.dart';
 
 class DiaryScreen extends StatefulWidget {
-  const DiaryScreen({super.key});
+  final DateTime? selectedDate;
+  
+  const DiaryScreen({super.key, this.selectedDate});
 
   @override
   State<DiaryScreen> createState() => _DiaryScreenState();
@@ -16,6 +18,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   double currentWater = 0;
   final double waterGoal = 2.5;
   final double step = 0.2;
+  String? lastWaterUpdateTime;
 
   List<Meal> todayMeals = [];
   double totalCalories = 0;
@@ -32,6 +35,63 @@ class _DiaryScreenState extends State<DiaryScreen> {
     loadUserProfileAndMeals();
   }
 
+  String _getWaterDocId(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> loadWaterForDate() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final docId = _getWaterDocId(_targetDate);
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('water_logs')
+        .doc(docId)
+        .get();
+
+    if (doc.exists) {
+      final data = doc.data()!;
+      setState(() {
+        currentWater = (data['amount'] as num?)?.toDouble() ?? 0;
+        if (data['lastUpdated'] != null) {
+          final timestamp = (data['lastUpdated'] as Timestamp).toDate();
+          lastWaterUpdateTime = '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
+        }
+      });
+    } else {
+      setState(() {
+        currentWater = 0;
+        lastWaterUpdateTime = null;
+      });
+    }
+  }
+
+  Future<void> saveWaterIntake(double amount) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final docId = _getWaterDocId(_targetDate);
+    final now = DateTime.now();
+    
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('water_logs')
+        .doc(docId)
+        .set({
+      'amount': amount,
+      'lastUpdated': Timestamp.fromDate(now),
+      'date': Timestamp.fromDate(_targetDate),
+    });
+
+    setState(() {
+      currentWater = amount;
+      lastWaterUpdateTime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    });
+  }
+
   Future<void> loadUserProfileAndMeals() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -46,20 +106,23 @@ class _DiaryScreenState extends State<DiaryScreen> {
       userProfile = UserModel.fromMap(user.uid, userDoc.data()!);
     }
     
-    await fetchTodayMeals();
+    await fetchMealsForDate();
+    await loadWaterForDate();
     
     setState(() {
       isLoading = false;
     });
   }
 
-  Future<void> fetchTodayMeals() async {
+  DateTime get _targetDate => widget.selectedDate ?? DateTime.now();
+
+  Future<void> fetchMealsForDate() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     final userId = user.uid;
-    final now = DateTime.now();
-    final startOfDay = DateTime(now.year, now.month, now.day);
+    final date = _targetDate;
+    final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
     final snapshot = await FirebaseFirestore.instance
@@ -86,6 +149,16 @@ class _DiaryScreenState extends State<DiaryScreen> {
       totalCarbs = carb;
       totalFat = fat;
     });
+  }
+
+  @override
+  void didUpdateWidget(DiaryScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reload meals and water when selectedDate changes
+    if (widget.selectedDate != oldWidget.selectedDate) {
+      fetchMealsForDate();
+      loadWaterForDate();
+    }
   }
 
   @override
@@ -216,8 +289,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     Text("${currentWater.toStringAsFixed(1)} / $waterGoal L",
                         style: const TextStyle(color: Colors.white, fontSize: 13)),
                     const SizedBox(height: 4),
-                    const Text("Last time 10:45 AM",
-                        style: TextStyle(color: Colors.grey, fontSize: 11)),
+                    Text(lastWaterUpdateTime != null ? "Last time $lastWaterUpdateTime" : "No water logged yet",
+                        style: const TextStyle(color: Colors.grey, fontSize: 11)),
                   ],
                 ),
               ),
@@ -226,9 +299,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   IconButton(
                     icon: const Icon(Icons.add, color: Colors.white, size: 20),
                     onPressed: () {
-                      setState(() {
-                        currentWater = (currentWater + step).clamp(0.0, waterGoal);
-                      });
+                      final newAmount = (currentWater + step).clamp(0.0, waterGoal);
+                      saveWaterIntake(newAmount);
                     },
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -236,9 +308,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   IconButton(
                     icon: const Icon(Icons.remove, color: Colors.white, size: 20),
                     onPressed: () {
-                      setState(() {
-                        currentWater = (currentWater - step).clamp(0.0, waterGoal);
-                      });
+                      final newAmount = (currentWater - step).clamp(0.0, waterGoal);
+                      saveWaterIntake(newAmount);
                     },
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -278,9 +349,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.add, color: Colors.black, size: 20),
-              onPressed: () {
-                Navigator.pushNamed(context, AppRoutes.mealEdit);
-                fetchTodayMeals();
+              onPressed: () async {
+                await Navigator.pushNamed(context, AppRoutes.mealEdit);
+                fetchMealsForDate();
               },
             ),
           ],

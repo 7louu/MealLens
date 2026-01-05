@@ -19,30 +19,47 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 1;
   String? userName;
-
-  final List<Widget> screens = const [
-    LensScreen(),
-    DiaryScreen(),
-    ReportsScreen(),
-  ];
+  String? userPhotoUrl;
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    _loadUserName();
+    _loadUserData();
   }
 
-  Future<void> _loadUserName() async {
+  Future<void> _loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       if (doc.exists && mounted) {
         setState(() {
           userName = doc.data()?['name'] ?? 'User';
+          userPhotoUrl = doc.data()?['photoUrl'];
         });
       }
     }
   }
+
+  String _getDateLabel() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selected = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+    
+    if (selected == today) {
+      return 'Today';
+    } else if (selected == today.subtract(const Duration(days: 1))) {
+      return 'Yesterday';
+    } else {
+      return '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}';
+    }
+  }
+
+  List<Widget> get screens => [
+    const LensScreen(),
+    DiaryScreen(selectedDate: selectedDate),
+    const ReportsScreen(),
+  ];
 
   void _showLogoutMenu(BuildContext context, Offset offset) async {
     final selected = await showMenu(
@@ -79,9 +96,11 @@ class _MainScreenState extends State<MainScreen> {
                   onTapDown: (details) {
                     _showLogoutMenu(context, details.globalPosition);
                   },
-                  child: const CircleAvatar(
+                  child: CircleAvatar(
                     radius: 22,
-                    backgroundImage: AssetImage('assets/images/default_avatar.png'),
+                    backgroundImage: userPhotoUrl != null && userPhotoUrl!.isNotEmpty
+                        ? NetworkImage(userPhotoUrl!)
+                        : const AssetImage('assets/images/default_avatar.png') as ImageProvider,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -92,22 +111,27 @@ class _MainScreenState extends State<MainScreen> {
                 const Spacer(),
                 Column(
                   children: [
-                    const Text(
-                      'Today',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                    Text(
+                      _getDateLabel(),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                     ),
                     IconButton(
                       icon: const Icon(Icons.calendar_today, size: 20),
                       onPressed: () async {
-                        await showDatePicker(
+                        final picked = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now(),
+                          initialDate: selectedDate,
                           firstDate: DateTime(2022),
-                          lastDate: DateTime(2100),
+                          lastDate: DateTime.now(),
                           builder: (context, child) {
                             return Theme(data: ThemeData.light(), child: child!);
                           },
                         );
+                        if (picked != null && picked != selectedDate) {
+                          setState(() {
+                            selectedDate = picked;
+                          });
+                        }
                       },
                     ),
                   ],

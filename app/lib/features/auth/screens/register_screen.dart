@@ -5,6 +5,7 @@ import '../../../routes/routes.dart';
 import '../../../registration_data.dart';
 import '../services/auth_service.dart';
 import '../../../shared/services/user_service.dart';
+import '../../../shared/services/storage_service.dart';
 import '../../../shared/models/user_model.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -140,6 +141,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                         try {
                           final authService = AuthService();
                           final userService = UserService();
+                          final storageService = StorageService();
 
                           // Step 1: Create account in Firebase Auth
                           final user = await authService.registerWithEmail(
@@ -157,13 +159,19 @@ class RegisterScreenState extends State<RegisterScreen> {
                             return;
                           }
 
-                          // Step 2: Build UserModel
+                          // Step 2: Upload profile picture if selected
+                          String? photoUrl;
+                          if (profileImage != null) {
+                            photoUrl = await storageService.uploadProfilePicture(profileImage!);
+                          }
+
+                          // Step 3: Build UserModel
                           final userModel = UserModel(
                             id: user.id,
                             name: RegistrationData.instance.name!,
                             email: RegistrationData.instance.email!,
                             role: 'user',
-                            photoUrl: '', // Add Firebase Storage logic later if needed
+                            photoUrl: photoUrl ?? '',
                             gender: RegistrationData.instance.gender ?? '',
                             age: RegistrationData.instance.age ?? 0,
                             height: RegistrationData.instance.height ?? 0,
@@ -172,12 +180,12 @@ class RegisterScreenState extends State<RegisterScreen> {
                             activityLevel: RegistrationData.instance.activityLevel ?? 'Sedentary',
                           );
 
-                          // Step 3: Save to Firestore
+                          // Step 4: Save to Firestore
                           await userService.createOrUpdateUser(userModel);
 
                           Navigator.pop(context); // Remove loading
 
-                          // Step 4: Navigate to main screen
+                          // Step 5: Navigate to main screen
                           Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
 
                         } catch (e) {

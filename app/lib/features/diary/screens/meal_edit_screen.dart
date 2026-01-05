@@ -19,6 +19,7 @@ class MealEditScreen extends StatefulWidget {
 class MealEditScreenState extends State<MealEditScreen> {
   final TextEditingController _titleController = TextEditingController();
   List<MealItem> selectedItems = [];
+  bool _isSaving = false;
 
   void addFoodItem(Food item) async {
     final weight = await showDialog<double>(
@@ -118,7 +119,7 @@ class MealEditScreenState extends State<MealEditScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () async {
+                onPressed: _isSaving ? null : () async {
                   final user = FirebaseAuth.instance.currentUser;
                   if (user == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -126,6 +127,8 @@ class MealEditScreenState extends State<MealEditScreen> {
                     );
                     return;
                   }
+
+                  setState(() => _isSaving = true);
 
                   final userId = user.uid;
                   final timestamp = DateTime.now();
@@ -153,13 +156,19 @@ class MealEditScreenState extends State<MealEditScreen> {
 
                   Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
                 },
-                child: const Text(
-                  "Save Meal",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
+                child: _isSaving 
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Text(
+                        "Save Meal",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
             ),
           ),
