@@ -1,27 +1,34 @@
 //in flutter you can't import an entire folder directly you can either import each file 
 //or create a barrel file that exports everything from that folder
 //we used it here to give the routes.dart file access to all the screens
-export 'splashScreen.dart';
-export 'onboardingScreen.dart';
-export 'welcomeScreen.dart';
 
-export 'singInBottomSheet.dart';
-export 'loginScreen.dart';
+// ==================== AUTH ====================
+export '../features/auth/screens/welcome_screen.dart';
+export '../features/auth/screens/sign_in_bottom_sheet.dart';
+export '../features/auth/screens/login_screen.dart';
+export '../features/auth/screens/register_bottom_sheet.dart';
+export '../features/auth/screens/register_screen.dart';
 
-export 'goalScreen.dart';
-export 'genderScreen.dart';
-export 'activityScreen.dart';
-export 'heightScreen.dart';
-export 'weightScreen.dart';
-export 'ageScreen.dart';
+// ==================== ONBOARDING ====================
+export '../features/onboarding/screens/splash_screen.dart';
+export '../features/onboarding/screens/onboarding_screen.dart';
+export '../features/onboarding/screens/goal_screen.dart';
+export '../features/onboarding/screens/gender_screen.dart';
+export '../features/onboarding/screens/activity_screen.dart';
+export '../features/onboarding/screens/height_screen.dart';
+export '../features/onboarding/screens/weight_screen.dart';
+export '../features/onboarding/screens/age_screen.dart';
 
-export 'registerBottomSheet.dart';
+// ==================== DIARY ====================
+export '../features/diary/screens/main_screen.dart';
+export '../features/diary/screens/diary_screen.dart';
+export '../features/diary/screens/meal_edit_screen.dart';
 
-export 'registerScreen.dart';
+// ==================== LENS ====================
+export '../features/lens/screens/lens_screen.dart';
 
-export 'mainScreen.dart';
-export 'diaryScreen.dart';
-export 'reportScreen.dart';
-export 'lensScreen.dart';
-export 'mealEditScreen.dart';
-export 'foodSearchScreen.dart';
+// ==================== REPORTS ====================
+export '../features/reports/screens/report_screen.dart';
+
+// ==================== FOOD ====================
+export '../features/food/screens/food_search_screen.dart';

@@ -1,0 +1,31 @@
+# ==================== PROJECT-WIDE IGNORES ====================
+# This root .gitignore handles cross-project concerns
+# Subdirectories (app/, backend/) have their own .gitignore for tech-specific files
+
+# === Development Environment ===
+# Python Virtual Environment (for scripts/)
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VS Code (project-wide settings)
+.vscode/
+*.code-workspace
+
+# === OS Files ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Project Documentation ===
+Refactoring.md
+
+# === Notes ===
+# - app/.gitignore handles Flutter/Dart-specific files
+# - backend/.gitignore handles Node.js/Firebase-specific files
+# - .env files are handled by subdirectory .gitignores
