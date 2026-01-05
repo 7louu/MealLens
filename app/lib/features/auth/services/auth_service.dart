@@ -1,5 +1,6 @@
 import 'package:app/registration_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../shared/models/user_model.dart';
@@ -55,7 +56,7 @@ class AuthService {
       return newUser;
 
     } catch (e) {
-      print("Google Sign-in failed: $e");
+      if (kDebugMode) debugPrint('Google Sign-in failed: $e');
       return null;
     }
   }
@@ -79,7 +80,7 @@ class AuthService {
 
       return null; // No profile found
     } catch (e) {
-      print("Email sign-in failed: $e");
+      if (kDebugMode) debugPrint('Email sign-in failed: $e');
       return null;
     }
   }
@@ -116,7 +117,7 @@ class AuthService {
       await userService.createOrUpdateUser(userModel);
       return userModel;
     } catch (e) {
-      print("Email registration failed: $e");
+      if (kDebugMode) debugPrint('Email registration failed: $e');
       return null;
     }
   }

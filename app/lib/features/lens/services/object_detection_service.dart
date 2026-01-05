@@ -1,6 +1,6 @@
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter_onnxruntime/flutter_onnxruntime.dart';
@@ -10,33 +10,39 @@ class ObjectDetectionService {
   List<String> _labels = [];
   bool _isInitialized = false;
 
+  void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('ObjectDetectionService: $message');
+    }
+  }
+
   Future<void> initialize() async {
-    print("ObjectDetectionService: Initializing...");
+    _log('Initializing...');
     try {
       // Load ONNX model
-      print("ObjectDetectionService: Loading model from assets/ai_models/yolo11n.onnx...");
+      _log('Loading model from assets/ai_models/yolo11n.onnx...');
       final ort = OnnxRuntime();
       _session = await ort.createSessionFromAsset('assets/ai_models/yolo11n.onnx');
-      print("ObjectDetectionService: Model loaded successfully.");
+      _log('Model loaded successfully.');
 
       // Load labels
-      print("ObjectDetectionService: Loading labels...");
+      _log('Loading labels...');
       final labelsData = await rootBundle.loadString('assets/ai_models/labels.txt');
       _labels = labelsData.split('\n').where((line) => line.trim().isNotEmpty).toList();
-      print("ObjectDetectionService: Loaded ${_labels.length} labels.");
+      _log('Loaded ${_labels.length} labels.');
 
       _isInitialized = true;
-      print("ObjectDetectionService: Initialization Complete!");
+      _log('Initialization Complete!');
     } catch (e, stackTrace) {
-      print("ObjectDetectionService: Failed to initialize: $e");
-      print("Stack trace: $stackTrace");
+      _log('Failed to initialize: $e');
+      if (kDebugMode) debugPrint('Stack trace: $stackTrace');
       _isInitialized = false;
     }
   }
 
   Future<List<Map<String, dynamic>>> runInference(CameraImage image) async {
     if (!_isInitialized || _session == null) {
-      print("ObjectDetectionService: Not initialized");
+      _log('Not initialized');
       return [];
     }
 
@@ -44,7 +50,7 @@ class ObjectDetectionService {
       // Convert YUV to RGB
       final rgbImage = _convertCameraImage(image);
       if (rgbImage == null) {
-        print("ObjectDetectionService: Image conversion failed");
+        _log('Image conversion failed');
         return [];
       }
 
@@ -74,10 +80,10 @@ class ObjectDetectionService {
       // Process outputs
       final detections = await _postProcess(outputs, image.width, image.height);
 
-      print("ObjectDetectionService: Inference complete. Found ${detections.length} detections.");
+      _log('Inference complete. Found ${detections.length} detections.');
       return detections;
     } catch (e) {
-      print("ObjectDetectionService: Inference error: $e");
+      _log('Inference error: $e');
       return [];
     }
   }
@@ -94,18 +100,18 @@ class ObjectDetectionService {
       final outputData = await output.asList();
       
       // Debug: Print output structure
-      print("ObjectDetectionService: Output type: ${outputData.runtimeType}");
-      print("ObjectDetectionService: Output length: ${outputData.length}");
+      _log('Output type: ${outputData.runtimeType}');
+      _log('Output length: ${outputData.length}');
       if (outputData.isNotEmpty) {
         final batch = outputData[0];
-        print("ObjectDetectionService: Batch type: ${batch.runtimeType}");
+        _log('Batch type: ${batch.runtimeType}');
         if (batch is List) {
-          print("ObjectDetectionService: Batch length: ${batch.length}");
+          _log('Batch length: ${batch.length}');
           if (batch.isNotEmpty) {
             final firstRow = batch[0];
-            print("ObjectDetectionService: First row type: ${firstRow.runtimeType}");
+            _log('First row type: ${firstRow.runtimeType}');
             if (firstRow is List) {
-              print("ObjectDetectionService: First row length: ${firstRow.length}");
+              _log('First row length: ${firstRow.length}');
             }
           }
         }
@@ -166,13 +172,13 @@ class ObjectDetectionService {
         }
       }
 
-      print("ObjectDetectionService: Max confidence seen: $maxConfSeen");
-      print("ObjectDetectionService: Detections > 5%: $highConfCount");
-      print("ObjectDetectionService: Found ${candidates.length} candidates above threshold.");
+      _log('Max confidence seen: $maxConfSeen');
+      _log('Detections > 5%: $highConfCount');
+      _log('Found ${candidates.length} candidates above threshold.');
 
-      print("ObjectDetectionService: Found ${candidates.length} candidates.");
+      _log('Found ${candidates.length} candidates.');
       if (candidates.isNotEmpty) {
-        print("ObjectDetectionService: Highest confidence: ${candidates.map((c) => c['confidence']).reduce((a, b) => a > b ? a : b)}");
+        _log('Highest confidence: ${candidates.map((c) => c['confidence']).reduce((a, b) => a > b ? a : b)}');
       }
 
       // Apply NMS
@@ -197,7 +203,7 @@ class ObjectDetectionService {
 
       return detections;
     } catch (e) {
-      print("ObjectDetectionService: Post-processing error: $e");
+      _log('Post-processing error: $e');
       return [];
     }
   }
@@ -219,7 +225,7 @@ class ObjectDetectionService {
       }
       return null;
     } catch (e) {
-      print("ObjectDetectionService: Image conversion error: $e");
+      _log('Image conversion error: $e');
       return null;
     }
   }

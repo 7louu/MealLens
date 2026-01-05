@@ -357,16 +357,41 @@ class _DiaryScreenState extends State<DiaryScreen> {
           ],
         ),
         const SizedBox(height: 6),
-        ...todayMeals.map((meal) {
-          final time = TimeOfDay.fromDateTime(meal.timestamp);
-          final formattedTime = "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
-          return Column(
-            children: [
-              mealCard(meal.title, formattedTime, meal.totalCalories.round()),
-              const SizedBox(height: 8),
-            ],
-          );
-        }).toList(),
+        if (todayMeals.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 32),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.restaurant_menu, size: 48, color: Colors.grey[400]),
+                const SizedBox(height: 12),
+                Text(
+                  'No meals logged yet',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Tap + to add your first meal',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                ),
+              ],
+            ),
+          )
+        else
+          ...todayMeals.map((meal) {
+            final time = TimeOfDay.fromDateTime(meal.timestamp);
+            final formattedTime = "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
+            return Column(
+              children: [
+                mealCard(meal.title, formattedTime, meal.totalCalories.round()),
+                const SizedBox(height: 8),
+              ],
+            );
+          }),
       ],
     );
   }

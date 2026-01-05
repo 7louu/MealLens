@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -23,7 +24,7 @@ class StorageService {
       
       return downloadUrl;
     } catch (e) {
-      print('Error uploading profile picture: $e');
+      if (kDebugMode) debugPrint('Error uploading profile picture: $e');
       return null;
     }
   }
@@ -38,7 +39,7 @@ class StorageService {
       await ref.delete();
       return true;
     } catch (e) {
-      print('Error deleting profile picture: $e');
+      if (kDebugMode) debugPrint('Error deleting profile picture: $e');
       return false;
     }
   }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -27,7 +28,7 @@ class FoodRecognitionService {
       final response = await _model.generateContent(content);
       return response.text;
     } catch (e) {
-      print('Error analyzing image: $e');
+      if (kDebugMode) debugPrint('Error analyzing image: $e');
       return null;
     }
   }

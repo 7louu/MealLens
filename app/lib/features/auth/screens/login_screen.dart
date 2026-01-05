@@ -1,6 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../../routes/routes.dart';
-import '../services/auth_service.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -76,25 +77,56 @@ class LoginScreenState extends State<LoginScreen> {
                       ),
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          final authService = AuthService();
                           showDialog(
                             context: context,
                             barrierDismissible: false,
                             builder: (context) => const Center(child: CircularProgressIndicator()),
                           );
 
-                          final userModel = await authService.signInWithEmail(
-                            email: emailController.text.trim(),
-                            password: passwordController.text.trim(),
-                          );
+                          try {
+                            final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                              email: emailController.text.trim(),
+                              password: passwordController.text.trim(),
+                            );
 
-                          Navigator.pop(context);
+                            Navigator.pop(context); // Remove loading
 
-                          if (userModel != null) {
-                            Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
-                          } else {
+                            if (credential.user != null) {
+                              Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
+                            }
+                          } on FirebaseAuthException catch (e) {
+                            Navigator.pop(context); // Remove loading
+                            
+                            String message;
+                            switch (e.code) {
+                              case 'user-not-found':
+                                message = 'No account found with this email';
+                                break;
+                              case 'wrong-password':
+                                message = 'Incorrect password';
+                                break;
+                              case 'invalid-email':
+                                message = 'Invalid email address';
+                                break;
+                              case 'user-disabled':
+                                message = 'This account has been disabled';
+                                break;
+                              case 'too-many-requests':
+                                message = 'Too many attempts. Please try again later';
+                                break;
+                              case 'invalid-credential':
+                                message = 'Invalid email or password';
+                                break;
+                              default:
+                                message = 'Login failed: ${e.message}';
+                            }
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Login failed. Please check your credentials.')),
+                              SnackBar(content: Text(message), backgroundColor: Colors.red),
+                            );
+                          } catch (e) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('An error occurred: $e'), backgroundColor: Colors.red),
                             );
                           }
                         }
@@ -107,9 +139,7 @@ class LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   GestureDetector(
-                    onTap: () {
-                      // TODO: Navigate to password recovery screen
-                    },
+                    onTap: () => _showPasswordResetDialog(context),
                     child: Text(
                       'Forgot password?',
                       style: TextStyle(
@@ -123,6 +153,73 @@ class LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showPasswordResetDialog(BuildContext context) {
+    final resetEmailController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter your email address and we\'ll send you a link to reset your password.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: resetEmailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.email_outlined),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final email = resetEmailController.text.trim();
+              if (email.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter your email')),
+                );
+                return;
+              }
+              
+              try {
+                await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Password reset email sent! Check your inbox.'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } on FirebaseAuthException catch (e) {
+                String message = 'Failed to send reset email';
+                if (e.code == 'user-not-found') {
+                  message = 'No account found with this email';
+                } else if (e.code == 'invalid-email') {
+                  message = 'Invalid email address';
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(message), backgroundColor: Colors.red),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+            child: const Text('Send Reset Link', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }

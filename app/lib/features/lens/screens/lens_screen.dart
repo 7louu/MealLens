@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -68,7 +69,7 @@ class _LensScreenState extends ConsumerState<LensScreen> {
         }
       });
     } catch (e) {
-      print('Camera initialization failed: $e');
+      if (kDebugMode) debugPrint('Camera initialization failed: $e');
     }
   }
 
@@ -138,7 +139,7 @@ class _LensScreenState extends ConsumerState<LensScreen> {
       });
 
     } catch (e) {
-      print("Error capturing: $e");
+      if (kDebugMode) debugPrint('Error capturing: $e');
       if (mounted && Navigator.canPop(context)) Navigator.pop(context);
     }
   }

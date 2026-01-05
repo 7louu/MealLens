@@ -172,13 +172,54 @@ class ReportsScreenState extends State<ReportsScreen> {
           children: [
             buildWeightHeader(),
             const SizedBox(height: 12),
-            buildWeightChart(),
-            const SizedBox(height: 20),
-            buildResultsHeader(),
-            const SizedBox(height: 10),
-            ...weightEntries.reversed.map(buildResultCard),
+            if (weightEntries.isEmpty)
+              buildEmptyState()
+            else ...[
+              buildWeightChart(),
+              const SizedBox(height: 20),
+              buildResultsHeader(),
+              const SizedBox(height: 10),
+              ...weightEntries.reversed.map(buildResultCard),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.monitor_weight_outlined, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            'No weight entries yet',
+            style: TextStyle(color: Colors.grey[700], fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Start tracking your progress by adding your first weight entry',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey[500], fontSize: 14),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: showAddWeightDialog,
+            icon: const Icon(Icons.add, color: Colors.white),
+            label: const Text('Add Weight', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ],
       ),
     );
   }
