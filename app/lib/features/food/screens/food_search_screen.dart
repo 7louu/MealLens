@@ -1,8 +1,62 @@
 import 'package:flutter/material.dart';
 import '../../../shared/models/food_model.dart';
 
-class FoodSearchScreen extends StatelessWidget {
+class FoodSearchScreen extends StatefulWidget {
   const FoodSearchScreen({super.key});
+
+  @override
+  State<FoodSearchScreen> createState() => _FoodSearchScreenState();
+}
+
+class _FoodSearchScreenState extends State<FoodSearchScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String? _selectedCategory;
+
+  // Category styling
+  static const Map<String, IconData> _categoryIcons = {
+    'Fruit': Icons.apple,
+    'Vegetable': Icons.eco,
+    'Grain': Icons.grain,
+    'Protein': Icons.fitness_center,
+    'Dairy': Icons.water_drop,
+    'Nuts': Icons.spa,
+    'Seeds': Icons.grass,
+    'Oil': Icons.opacity,
+    'Legume': Icons.scatter_plot,
+    'Snack': Icons.cookie,
+    'Sweetener': Icons.cake,
+    'Supplement': Icons.science,
+  };
+
+  static const Map<String, Color> _categoryColors = {
+    'Fruit': Color(0xFFE91E63),
+    'Vegetable': Color(0xFF4CAF50),
+    'Grain': Color(0xFFFF9800),
+    'Protein': Color(0xFFF44336),
+    'Dairy': Color(0xFF2196F3),
+    'Nuts': Color(0xFF795548),
+    'Seeds': Color(0xFF8BC34A),
+    'Oil': Color(0xFFFFEB3B),
+    'Legume': Color(0xFF9C27B0),
+    'Snack': Color(0xFFFF5722),
+    'Sweetener': Color(0xFFFFC107),
+    'Supplement': Color(0xFF00BCD4),
+  };
+
+  IconData _getCategoryIcon(String category) {
+    return _categoryIcons[category] ?? Icons.restaurant;
+  }
+
+  Color _getCategoryColor(String category) {
+    return _categoryColors[category] ?? Colors.grey;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +133,7 @@ class FoodSearchScreen extends StatelessWidget {
         carbsPerGram: 0.13,
         fatPerGram: 0.001,
       ),
-      
+
       // Vegetables
       Food(
         id: "broccoli",
@@ -153,7 +207,7 @@ class FoodSearchScreen extends StatelessWidget {
         carbsPerGram: 0.06,
         fatPerGram: 0.003,
       ),
-      
+
       // Grains
       Food(
         id: "rice",
@@ -209,7 +263,7 @@ class FoodSearchScreen extends StatelessWidget {
         carbsPerGram: 0.21,
         fatPerGram: 0.019,
       ),
-      
+
       // Proteins
       Food(
         id: "chickenBreast",
@@ -274,7 +328,7 @@ class FoodSearchScreen extends StatelessWidget {
         carbsPerGram: 0.02,
         fatPerGram: 0.05,
       ),
-      
+
       // Dairy
       Food(
         id: "milk",
@@ -312,7 +366,7 @@ class FoodSearchScreen extends StatelessWidget {
         carbsPerGram: 0.03,
         fatPerGram: 0.04,
       ),
-      
+
       // Nuts & Seeds
       Food(
         id: "almonds",
@@ -368,7 +422,7 @@ class FoodSearchScreen extends StatelessWidget {
         carbsPerGram: 0.42,
         fatPerGram: 0.31,
       ),
-      
+
       // Fats & Oils
       Food(
         id: "avocado",
@@ -388,7 +442,7 @@ class FoodSearchScreen extends StatelessWidget {
         carbsPerGram: 0.0,
         fatPerGram: 1.0,
       ),
-      
+
       // Legumes
       Food(
         id: "lentils",
@@ -426,7 +480,7 @@ class FoodSearchScreen extends StatelessWidget {
         carbsPerGram: 0.23,
         fatPerGram: 0.005,
       ),
-      
+
       // Snacks & Extras
       Food(
         id: "dark_chocolate",
@@ -457,20 +511,397 @@ class FoodSearchScreen extends StatelessWidget {
       ),
     ];
 
+    // Get unique categories
+    final categories = foodList.map((f) => f.category).toSet().toList()..sort();
+
+    // Filter foods based on search and category
+    List<Food> filteredFoods =
+        foodList.where((food) {
+          final matchesSearch =
+              _searchQuery.isEmpty ||
+              food.name.toLowerCase().contains(_searchQuery.toLowerCase());
+          final matchesCategory =
+              _selectedCategory == null || food.category == _selectedCategory;
+          return matchesSearch && matchesCategory;
+        }).toList();
+
+    // Group by category for display
+    Map<String, List<Food>> groupedFoods = {};
+    for (var food in filteredFoods) {
+      groupedFoods.putIfAbsent(food.category, () => []).add(food);
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Search Food")),
-      body: ListView.builder(
-        itemCount: foodList.length,
-        itemBuilder: (_, index) {
-          final food = foodList[index];
-          return ListTile(
-            title: Text(food.name),
-            subtitle: Text("${(food.caloriesPerGram * 100).toStringAsFixed(0)} kcal / 100g"),
-            onTap: () {
-              Navigator.pop(context, food);
-            },
-          );
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text(
+          "Add Food",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+      ),
+      body: Column(
+        children: [
+          // Search and Filter Section
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Column(
+              children: [
+                // Search Bar
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) => setState(() => _searchQuery = value),
+                    decoration: InputDecoration(
+                      hintText: 'Search foods...',
+                      hintStyle: TextStyle(color: Colors.grey[500]),
+                      prefixIcon: Icon(Icons.search, color: Colors.grey[500]),
+                      suffixIcon:
+                          _searchQuery.isNotEmpty
+                              ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _searchQuery = '');
+                                },
+                              )
+                              : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Category Filter Chips
+                SizedBox(
+                  height: 36,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      _buildCategoryChip('All', null),
+                      ...categories.map((cat) => _buildCategoryChip(cat, cat)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Results Count
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              '${filteredFoods.length} foods found',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+
+          // Food List
+          Expanded(
+            child:
+                filteredFoods.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      itemCount:
+                          _selectedCategory != null
+                              ? filteredFoods.length
+                              : groupedFoods.keys.length,
+                      itemBuilder: (context, index) {
+                        if (_selectedCategory != null) {
+                          // Show flat list when category is selected
+                          return _buildFoodCard(filteredFoods[index]);
+                        } else {
+                          // Show grouped list
+                          final category = groupedFoods.keys.toList()[index];
+                          final foods = groupedFoods[category]!;
+                          return _buildCategorySection(category, foods);
+                        }
+                      },
+                    ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip(String label, String? category) {
+    final isSelected = _selectedCategory == category;
+    final color = category != null ? _getCategoryColor(category) : Colors.blue;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.grey[700],
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            fontSize: 13,
+          ),
+        ),
+        selected: isSelected,
+        onSelected: (_) {
+          setState(() {
+            _selectedCategory = category;
+          });
         },
+        backgroundColor: Colors.grey[200],
+        selectedColor: color,
+        checkmarkColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+    );
+  }
+
+  Widget _buildCategorySection(String category, List<Food> foods) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 16, bottom: 8),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: _getCategoryColor(category).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  _getCategoryIcon(category),
+                  size: 16,
+                  color: _getCategoryColor(category),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                category,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '${foods.length}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        ...foods.map((food) => _buildFoodCard(food)),
+      ],
+    );
+  }
+
+  Widget _buildFoodCard(Food food) {
+    final color = _getCategoryColor(food.category);
+    final calories = (food.caloriesPerGram * 100).toStringAsFixed(0);
+    final protein = (food.proteinPerGram * 100).toStringAsFixed(1);
+    final carbs = (food.carbsPerGram * 100).toStringAsFixed(1);
+    final fat = (food.fatPerGram * 100).toStringAsFixed(1);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () => Navigator.pop(context, food),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Category Icon
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [color.withOpacity(0.8), color],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    _getCategoryIcon(food.category),
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+
+                // Food Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        food.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        food.category,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                      ),
+                      const SizedBox(height: 8),
+                      // Macro pills
+                      Row(
+                        children: [
+                          _buildMacroPill(
+                            'P',
+                            protein,
+                            const Color(0xFFE91E63),
+                          ),
+                          const SizedBox(width: 6),
+                          _buildMacroPill('C', carbs, const Color(0xFFFF9800)),
+                          const SizedBox(width: 6),
+                          _buildMacroPill('F', fat, const Color(0xFF2196F3)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Calories
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      calories,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    Text(
+                      'kcal',
+                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'per 100g',
+                      style: TextStyle(fontSize: 10, color: Colors.grey[400]),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(width: 8),
+                Icon(Icons.chevron_right, color: Colors.grey[400]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMacroPill(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 3),
+          Text(
+            '${value}g',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: color.withOpacity(0.8),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(40),
+            ),
+            child: Icon(Icons.search_off, size: 40, color: Colors.grey[400]),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No foods found',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try a different search term or category',
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+          ),
+        ],
       ),
     );
   }

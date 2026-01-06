@@ -27,11 +27,22 @@ class Meal {
   });
 
   factory Meal.fromMap(Map<String, dynamic> data, String id) {
+    // Handle timestamp safely - could be Timestamp, DateTime, or null
+    DateTime timestamp;
+    final tsData = data['timestamp'];
+    if (tsData is Timestamp) {
+      timestamp = tsData.toDate();
+    } else if (tsData is DateTime) {
+      timestamp = tsData;
+    } else {
+      timestamp = DateTime.now();
+    }
+    
     return Meal(
       id: id,
       userId: data['userId'] ?? '',
       title: data['title'] ?? 'Untitled Meal',
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
+      timestamp: timestamp,
       imageUrl: data['imageUrl'], // nullable, no issue
       items: (data['items'] as List?)?.map((item) =>
         MealItem.fromMap(item as Map<String, dynamic>)

@@ -10,7 +10,9 @@ import '../services/food_recognition_service.dart';
 import '../models/food_recognition_result.dart';
 
 class LensScreen extends ConsumerStatefulWidget {
-  const LensScreen({super.key});
+  final DateTime? selectedDate;
+
+  const LensScreen({super.key, this.selectedDate});
 
   @override
   ConsumerState<LensScreen> createState() => _LensScreenState();
@@ -22,9 +24,13 @@ class _LensScreenState extends ConsumerState<LensScreen> {
   bool _isDetecting = false;
   int _frameCount = 0;
   List<Map<String, dynamic>> _detections = [];
-  
-  final ObjectDetectionService _objectDetectionService = ObjectDetectionService();
-  final FoodRecognitionService _foodRecognitionService = FoodRecognitionService();
+
+  DateTime get _targetDate => widget.selectedDate ?? DateTime.now();
+
+  final ObjectDetectionService _objectDetectionService =
+      ObjectDetectionService();
+  final FoodRecognitionService _foodRecognitionService =
+      FoodRecognitionService();
 
   @override
   void initState() {
@@ -51,13 +57,16 @@ class _LensScreenState extends ConsumerState<LensScreen> {
       camera,
       ResolutionPreset.medium,
       enableAudio: false,
-      imageFormatGroup: Platform.isAndroid ? ImageFormatGroup.yuv420 : ImageFormatGroup.bgra8888,
+      imageFormatGroup:
+          Platform.isAndroid
+              ? ImageFormatGroup.yuv420
+              : ImageFormatGroup.bgra8888,
     );
 
     try {
       await _controller!.initialize();
       if (!mounted) return;
-      
+
       setState(() {
         _isCameraInitialized = true;
       });
@@ -80,16 +89,16 @@ class _LensScreenState extends ConsumerState<LensScreen> {
       _isDetecting = false;
       return;
     }
-    
+
     // Run inference
     final results = await _objectDetectionService.runInference(image);
-    
+
     if (mounted) {
       setState(() {
         _detections = results;
       });
     }
-    
+
     _isDetecting = false;
   }
 
@@ -99,7 +108,7 @@ class _LensScreenState extends ConsumerState<LensScreen> {
     try {
       // Stop streaming to capture
       await _controller!.stopImageStream();
-      
+
       final XFile file = await _controller!.takePicture();
       final File imageFile = File(file.path);
 
@@ -108,22 +117,26 @@ class _LensScreenState extends ConsumerState<LensScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: Colors.white),
-              SizedBox(height: 16),
-              Text('Analyzing food...', style: TextStyle(color: Colors.white, fontSize: 16)),
-            ],
-          ),
-        ),
+        builder:
+            (context) => const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(color: Colors.white),
+                  SizedBox(height: 16),
+                  Text(
+                    'Analyzing food...',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
       );
 
       // Analyze
       final rawResult = await _foodRecognitionService.analyzeImage(imageFile);
       final result = FoodRecognitionResult.fromGeminiResponse(rawResult);
-      
+
       if (!mounted) return;
       Navigator.pop(context); // Hide loading
 
@@ -137,7 +150,6 @@ class _LensScreenState extends ConsumerState<LensScreen> {
           _runDetection(image);
         }
       });
-
     } catch (e) {
       if (kDebugMode) debugPrint('Error capturing: $e');
       if (mounted && Navigator.canPop(context)) Navigator.pop(context);
@@ -151,17 +163,23 @@ class _LensScreenState extends ConsumerState<LensScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.3,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) => _buildResultsContent(result, scrollController),
-      ),
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.6,
+            minChildSize: 0.3,
+            maxChildSize: 0.9,
+            expand: false,
+            builder:
+                (context, scrollController) =>
+                    _buildResultsContent(result, scrollController),
+          ),
     );
   }
 
-  Widget _buildResultsContent(FoodRecognitionResult result, ScrollController scrollController) {
+  Widget _buildResultsContent(
+    FoodRecognitionResult result,
+    ScrollController scrollController,
+  ) {
     if (result.hasError) {
       return Padding(
         padding: const EdgeInsets.all(24),
@@ -170,7 +188,10 @@ class _LensScreenState extends ConsumerState<LensScreen> {
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text('Analysis Error', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Analysis Error',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 8),
             Text(result.error ?? 'Unknown error occurred'),
             if (result.rawResponse != null) ...[
@@ -180,7 +201,10 @@ class _LensScreenState extends ConsumerState<LensScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8),
-                    child: Text(result.rawResponse!, style: const TextStyle(fontSize: 12)),
+                    child: Text(
+                      result.rawResponse!,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 ],
               ),
@@ -222,11 +246,13 @@ class _LensScreenState extends ConsumerState<LensScreen> {
             ),
           ),
         ),
-        
+
         // Title
         Text(
           'Food Analysis Results',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
 
@@ -238,15 +264,38 @@ class _LensScreenState extends ConsumerState<LensScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Total Nutrition', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const Text(
+                  'Total Nutrition',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildNutrientColumn('Calories', '${result.totalCalories.toStringAsFixed(0)}', 'kcal', Colors.orange),
-                    _buildNutrientColumn('Protein', '${result.totalProtein.toStringAsFixed(1)}', 'g', Colors.red),
-                    _buildNutrientColumn('Carbs', '${result.totalCarbs.toStringAsFixed(1)}', 'g', Colors.blue),
-                    _buildNutrientColumn('Fat', '${result.totalFats.toStringAsFixed(1)}', 'g', Colors.purple),
+                    _buildNutrientColumn(
+                      'Calories',
+                      '${result.totalCalories.toStringAsFixed(0)}',
+                      'kcal',
+                      Colors.orange,
+                    ),
+                    _buildNutrientColumn(
+                      'Protein',
+                      '${result.totalProtein.toStringAsFixed(1)}',
+                      'g',
+                      Colors.red,
+                    ),
+                    _buildNutrientColumn(
+                      'Carbs',
+                      '${result.totalCarbs.toStringAsFixed(1)}',
+                      'g',
+                      Colors.blue,
+                    ),
+                    _buildNutrientColumn(
+                      'Fat',
+                      '${result.totalFats.toStringAsFixed(1)}',
+                      'g',
+                      Colors.purple,
+                    ),
                   ],
                 ),
               ],
@@ -261,27 +310,43 @@ class _LensScreenState extends ConsumerState<LensScreen> {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        
-        ...result.foods.map((food) => Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Colors.green,
-              child: Icon(Icons.restaurant, color: Colors.white),
-            ),
-            title: Text(food.foodName, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('${food.estimatedWeightG.toStringAsFixed(0)}g • ${food.calories.toStringAsFixed(0)} kcal'),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text('P: ${food.protein.toStringAsFixed(1)}g', style: const TextStyle(fontSize: 11)),
-                Text('C: ${food.carbs.toStringAsFixed(1)}g', style: const TextStyle(fontSize: 11)),
-                Text('F: ${food.fats.toStringAsFixed(1)}g', style: const TextStyle(fontSize: 11)),
-              ],
+
+        ...result.foods.map(
+          (food) => Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Colors.green,
+                child: Icon(Icons.restaurant, color: Colors.white),
+              ),
+              title: Text(
+                food.foodName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                '${food.estimatedWeightG.toStringAsFixed(0)}g • ${food.calories.toStringAsFixed(0)} kcal',
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'P: ${food.protein.toStringAsFixed(1)}g',
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                  Text(
+                    'C: ${food.carbs.toStringAsFixed(1)}g',
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                  Text(
+                    'F: ${food.fats.toStringAsFixed(1)}g',
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                ],
+              ),
             ),
           ),
-        )),
+        ),
 
         const SizedBox(height: 24),
 
@@ -294,11 +359,13 @@ class _LensScreenState extends ConsumerState<LensScreen> {
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         ),
         const SizedBox(height: 8),
-        
+
         // Retake button
         OutlinedButton.icon(
           onPressed: () => Navigator.pop(context),
@@ -306,17 +373,31 @@ class _LensScreenState extends ConsumerState<LensScreen> {
           label: const Text('Take Another Photo'),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildNutrientColumn(String label, String value, String unit, Color color) {
+  Widget _buildNutrientColumn(
+    String label,
+    String value,
+    String unit,
+    Color color,
+  ) {
     return Column(
       children: [
-        Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
         Text(unit, style: TextStyle(fontSize: 12, color: color)),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
@@ -341,23 +422,39 @@ class _LensScreenState extends ConsumerState<LensScreen> {
         builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
+      // Use selected date but preserve current time for ordering
+      final now = DateTime.now();
+      final mealTimestamp = DateTime(
+        _targetDate.year,
+        _targetDate.month,
+        _targetDate.day,
+        now.hour,
+        now.minute,
+        now.second,
+      );
+
       // Create meal document
       final mealData = {
         'userId': user.uid,
-        'title': 'Lens Scan - ${DateTime.now().toString().substring(0, 16)}',
-        'items': result.foods.map((food) => {
-          'foodName': food.foodName,
-          'weightGram': food.estimatedWeightG,
-          'calories': food.calories,
-          'protein': food.protein,
-          'carbs': food.carbs,
-          'fat': food.fats,
-        }).toList(),
+        'title': 'Lens Scan - ${mealTimestamp.toString().substring(0, 16)}',
+        'items':
+            result.foods
+                .map(
+                  (food) => {
+                    'foodName': food.foodName,
+                    'weightGram': food.estimatedWeightG,
+                    'calories': food.calories,
+                    'protein': food.protein,
+                    'carbs': food.carbs,
+                    'fat': food.fats,
+                  },
+                )
+                .toList(),
         'totalCalories': result.totalCalories,
         'totalProtein': result.totalProtein,
         'totalCarbs': result.totalCarbs,
         'totalFat': result.totalFats,
-        'timestamp': FieldValue.serverTimestamp(),
+        'timestamp': mealTimestamp,
         'source': 'lens_scan',
       };
 
@@ -377,7 +474,10 @@ class _LensScreenState extends ConsumerState<LensScreen> {
       if (mounted) {
         Navigator.pop(context); // Hide loading
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving meal: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error saving meal: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -431,10 +531,11 @@ class BoundingBoxPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.green
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.0;
+    final paint =
+        Paint()
+          ..color = Colors.green
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3.0;
 
     final textStyle = TextStyle(
       color: Colors.white,
@@ -448,17 +549,17 @@ class BoundingBoxPainter extends CustomPainter {
       // For now, we skip scaling logic as it requires knowing image size vs screen size
       if (detection['rect'] != null) {
         canvas.drawRect(detection['rect'], paint);
-        
-        final textSpan = TextSpan(
-          text: detection['label'],
-          style: textStyle,
-        );
+
+        final textSpan = TextSpan(text: detection['label'], style: textStyle);
         final textPainter = TextPainter(
           text: textSpan,
           textDirection: TextDirection.ltr,
         );
         textPainter.layout();
-        textPainter.paint(canvas, Offset(detection['rect'].left, detection['rect'].top - 20));
+        textPainter.paint(
+          canvas,
+          Offset(detection['rect'].left, detection['rect'].top - 20),
+        );
       }
     }
   }

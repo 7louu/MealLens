@@ -31,7 +31,11 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> _loadUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
       if (doc.exists && mounted) {
         setState(() {
           userName = doc.data()?['name'] ?? 'User';
@@ -44,8 +48,12 @@ class _MainScreenState extends State<MainScreen> {
   String _getDateLabel() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final selected = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
-    
+    final selected = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+    );
+
     if (selected == today) {
       return 'Today';
     } else if (selected == today.subtract(const Duration(days: 1))) {
@@ -56,7 +64,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   List<Widget> get screens => [
-    const LensScreen(),
+    LensScreen(selectedDate: selectedDate),
     DiaryScreen(selectedDate: selectedDate),
     const ReportsScreen(),
   ];
@@ -64,19 +72,22 @@ class _MainScreenState extends State<MainScreen> {
   void _showLogoutMenu(BuildContext context, Offset offset) async {
     final selected = await showMenu(
       context: context,
-      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx + 1, offset.dy + 1),
-      items: [
-        const PopupMenuItem<int>(
-          value: 0,
-          child: Text("Log out"),
-        ),
-      ],
+      position: RelativeRect.fromLTRB(
+        offset.dx,
+        offset.dy,
+        offset.dx + 1,
+        offset.dy + 1,
+      ),
+      items: [const PopupMenuItem<int>(value: 0, child: Text("Log out"))],
     );
 
     if (selected == 0) {
       await AuthService().signOutEmail();
       if (mounted) {
-        Navigator.pushReplacementNamed(context, AppRoutes.welcome); // Ensure '/home' route is defined
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.welcome,
+        ); // Ensure '/home' route is defined
       }
     }
   }
@@ -98,22 +109,32 @@ class _MainScreenState extends State<MainScreen> {
                   },
                   child: CircleAvatar(
                     radius: 22,
-                    backgroundImage: userPhotoUrl != null && userPhotoUrl!.isNotEmpty
-                        ? NetworkImage(userPhotoUrl!)
-                        : const AssetImage('assets/images/default_avatar.png') as ImageProvider,
+                    backgroundImage:
+                        userPhotoUrl != null && userPhotoUrl!.isNotEmpty
+                            ? NetworkImage(userPhotoUrl!)
+                            : const AssetImage(
+                                  'assets/images/default_avatar.png',
+                                )
+                                as ImageProvider,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   userName ?? 'Loading...',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const Spacer(),
                 Column(
                   children: [
                     Text(
                       _getDateLabel(),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.calendar_today, size: 20),
@@ -124,7 +145,10 @@ class _MainScreenState extends State<MainScreen> {
                           firstDate: DateTime(2022),
                           lastDate: DateTime.now(),
                           builder: (context, child) {
-                            return Theme(data: ThemeData.light(), child: child!);
+                            return Theme(
+                              data: ThemeData.light(),
+                              child: child!,
+                            );
                           },
                         );
                         if (picked != null && picked != selectedDate) {
@@ -162,8 +186,17 @@ class _MainScreenState extends State<MainScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(icon: Icons.camera_alt, label: 'Lens', index: 0),
-                _buildNavItem(icon: Icons.book, label: 'Diary', index: 1, isCenter: true),
-                _buildNavItem(icon: Icons.bar_chart, label: 'Reports', index: 2),
+                _buildNavItem(
+                  icon: Icons.book,
+                  label: 'Diary',
+                  index: 1,
+                  isCenter: true,
+                ),
+                _buildNavItem(
+                  icon: Icons.bar_chart,
+                  label: 'Reports',
+                  index: 2,
+                ),
               ],
             ),
           ),
@@ -182,13 +215,17 @@ class _MainScreenState extends State<MainScreen> {
     return GestureDetector(
       onTap: () => setState(() => selectedIndex = index),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 6, horizontal: isCenter ? 16 : 8),
-        decoration: isSelected
-            ? BoxDecoration(
-                color: Colors.greenAccent.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-              )
-            : null,
+        padding: EdgeInsets.symmetric(
+          vertical: 6,
+          horizontal: isCenter ? 16 : 8,
+        ),
+        decoration:
+            isSelected
+                ? BoxDecoration(
+                  color: Colors.greenAccent.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                )
+                : null,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

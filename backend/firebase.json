@@ -1,7 +1,7 @@
 {
   "firestore": {
     "rules": "firestore.rules",
-    "indexes": "none"
+    "indexes": "firestore.indexes.json"
   },
   "functions": [
     {
