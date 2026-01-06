@@ -11,3 +11,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Firebase and OAuth configuration files contain sensitive API keys
+app/google-services.json
+app/src/main/res/xml/auth_config.xml
